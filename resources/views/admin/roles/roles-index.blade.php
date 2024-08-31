@@ -15,12 +15,12 @@
                         </a>
                         <h3 class="text-lg font-semibold">{{ __('Roles') }}</h3>
                     </div>
-                    <table class="min-w-full bg-white w-full min-600">
+                    <table class="w-full bg-white w-full min-600">
                         <thead>
                             <tr>
                                 <th class="p-2 text-start">Name</th>
                                 <th class="p-2 text-start">Permissions</th>
-                                <th class="p-2 text-start">Actions</th>
+                                <th class="p-2 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -32,7 +32,7 @@
                                             <span class="bg-gray-200 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">{{ $permission->name }}</span>
                                         @endforeach
                                     </td>
-                                    <td class="p-2">
+                                    <td class="p-2 text-center">
                                         <a href="{{ route('roles-edit', $role->id) }}" class="inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">Edit</a>
                                         <form action="{{ route('roles-destroy', $role->id) }}" method="POST" class="inline-block">
                                             @csrf

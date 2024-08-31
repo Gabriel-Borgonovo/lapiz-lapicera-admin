@@ -15,12 +15,19 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('users')" :active="request()->routeIs('users')">
-                        {{ __('Users') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('roles')" :active="request()->routeIs('roles')">
-                        {{ __('Roles') }}
-                    </x-nav-link>
+                    @hasrole('Admin')
+                        <x-nav-link :href="route('users')" :active="request()->routeIs('users')">
+                            {{ __('Users') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('roles')" :active="request()->routeIs('roles')">
+                            {{ __('Roles') }}
+                        </x-nav-link>
+                    
+                        <x-nav-link :href="URL('permissions')" :active="request()->routeIs('permissions.index')">
+                            {{ __('Permissions') }}
+                        </x-nav-link>
+                    @endhasrole
                 </div>
             </div>
 
@@ -92,6 +99,20 @@
             </div>
 
             <div class="mt-3 space-y-1">
+                @hasrole('Admin')
+                    <x-responsive-nav-link :href="route('users')" :active="request()->routeIs('users')">
+                        {{ __('users') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('roles')" :active="request()->routeIs('roles')">
+                        {{ __('roles') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="URL('permissions')" :active="request()->routeIs('permissions.index')">
+                        {{ __('Permissions') }}
+                    </x-responsive-nav-link>
+                @endhasrole
+                
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
