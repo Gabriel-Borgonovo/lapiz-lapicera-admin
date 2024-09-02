@@ -76,9 +76,79 @@
                                     </td>
                                 </tr>
                             @endforeach
+
                         </tbody>
+                    </table>
+
                 </div>
             </div>
         </div>
-    </div>
+
+
+
+
+
+
+        <div>
+            <!-- Campo para capturar el código de barras -->
+            <input type="text" id="barcodeInput" class="absolute top-[-9999px] left-[-9999px]" />
+        
+            <!-- Modal para mostrar el código de barras -->
+            <div id="barcodeModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+                <div class="absolute inset-0 bg-gray-900 bg-opacity-50"></div>
+                <div class="bg-white rounded-lg shadow-lg p-6 z-10">
+                    <h2 class="text-xl font-bold mb-4">Código de Barras Escaneado</h2>
+                    <p id="barcodeText" class="mb-4"></p>
+                    <div class="flex justify-end space-x-4">
+                        <button id="closeModal"
+                            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+        <!-- Custom JavaScript -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const barcodeInput = document.getElementById('barcodeInput');
+                const barcodeModal = document.getElementById('barcodeModal');
+                const barcodeText = document.getElementById('barcodeText');
+                const closeModal = document.getElementById('closeModal');
+                
+                // Make the barcode input field temporarily visible and focused
+                function showBarcodeInput() {
+                    barcodeInput.classList.remove('hidden');
+                    barcodeInput.style.position = 'absolute';
+                    barcodeInput.style.top = '0';
+                    barcodeInput.style.left = '0';
+                    barcodeInput.style.opacity = '0';
+                    barcodeInput.focus();
+                }
+        
+                if (barcodeInput) {
+                    showBarcodeInput();
+        
+                    barcodeInput.addEventListener('input', function(event) {
+                        setTimeout(() => {
+                            const barcode = event.target.value.trim();
+        
+                            if (barcode) {
+                                // Mostrar el modal
+                                barcodeText.textContent = barcode;
+                                barcodeModal.classList.remove('hidden');
+        
+                                event.target.value = ''; // Limpiar el campo después de enviar
+                            }
+                        }, 100); // Ajustar el retraso según sea necesario
+                    });
+        
+                    // Cerrar el modal al hacer clic en el botón
+                    closeModal.addEventListener('click', function() {
+                        barcodeModal.classList.add('hidden');
+                    });
+                } else {
+                    console.error('Campo de código de barras no encontrado.');
+                }
+            });
+        </script>
 </x-app-layout>
