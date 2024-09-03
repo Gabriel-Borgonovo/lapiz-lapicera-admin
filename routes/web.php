@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -37,6 +38,18 @@ Route::middleware('auth')->group(function () {
         //permissions
         Route::resource('permissions', PermissionController::class);
     });
+
+    //products
+    // Ruta para la vista de productos
+    Route::get('/products', [ProductController::class, 'index'])->name('productsIndex');
+    Route::get('/products/json', [ProductController::class, 'getProducts'])->name('products.json');
+
+    // Otras rutas relacionadas con productos, como crear, editar, eliminar, etc.
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    // Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    // Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    // Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
