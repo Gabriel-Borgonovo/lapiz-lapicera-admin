@@ -98,8 +98,8 @@
                     <td class="p-2">${product.sale_price}</td>
                     <td class="p-2">${product.stock}</td>
                     <td class="p-2 text-center">
-                        <a href="/products/${product.id}/edit" class="inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">Editar</a>
-                        <form action="/products/${product.id}" method="POST" class="inline-block" onsubmit="return confirm('¿Está seguro de eliminar este producto?');">
+                        <a href="/admin/products/${product.id}/edit" class="inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">Editar</a>
+                        <form action="/admin/products/${product.id}" method="POST" class="inline-block" onsubmit="return confirm('¿Está seguro de eliminar este producto?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">Eliminar</button>
@@ -131,7 +131,7 @@
                 if (event.key === 'Enter') {
                     event.preventDefault();
                     fetchProducts(
-                        `/products/json?search=${searchInput.value}&category=${categoryInput.value}`);
+                        `/api/products/json?search=${searchInput.value}&category=${categoryInput.value}`);
                 }
             });
 
@@ -141,14 +141,14 @@
                 clearTimeout(timeout);
                 timeout = setTimeout(() => {
                     fetchProducts(
-                        `/products/json?search=${searchInput.value}&category=${categoryInput.value}`
+                        `/api/products/json?search=${searchInput.value}&category=${categoryInput.value}`
                         );
                 }, 300); // 300ms de debounce
             });
 
             // Manejar el envío del formulario cuando se cambia la categoría
             categoryInput.addEventListener('change', function() {
-                fetchProducts(`/products/json?search=${searchInput.value}&category=${categoryInput.value}`);
+                fetchProducts(`/api/products/json?search=${searchInput.value}&category=${categoryInput.value}`);
             });
 
             // Manejar el clic en el botón de limpiar
@@ -158,7 +158,7 @@
             });
 
             // Cargar los productos inicialmente
-            fetchProducts('/products/json');
+            fetchProducts('/api/products/json');
         });
     </script>
 </x-app-layout>

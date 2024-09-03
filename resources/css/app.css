@@ -6,3 +6,8 @@
 .min-600{
     min-width: 600px;
 }
+
+.image-edit{
+    width: 300px;
+    height: 300px;
+}

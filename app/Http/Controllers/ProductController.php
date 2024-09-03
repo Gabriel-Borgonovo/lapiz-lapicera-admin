@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -23,8 +25,8 @@ class ProductController extends Controller
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('barcode', 'LIKE', "%$search%")//'name', 'LIKE', "%$search%"
-                    ->orWhere('name', 'LIKE', "%$search%");//'barcode', 'LIKE', "%$search%"
+                $q->where('barcode', 'LIKE', "%$search%") //'name', 'LIKE', "%$search%"
+                    ->orWhere('name', 'LIKE', "%$search%"); //'barcode', 'LIKE', "%$search%"
             });
         }
 
@@ -67,8 +69,20 @@ class ProductController extends Controller
 
         // Manejo de la imagen (si se proporciona)
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('public/images/products');
-            $validated['image'] = basename($imagePath);
+            // Crear el directorio dinámico basado en la categoría
+            $categoryDirectory = 'imgs/products/' . Str::slug($request->input('category'));
+
+            if (env('APP_ENV') === 'production') {
+                // Guardar en el disco 'custom' para producción
+                $imagePath = $request->file('image')->store($categoryDirectory, 'custom');
+                // Construir la URL completa de la imagen
+                $validated['image'] = env('APP_URL') . '/' . $imagePath;
+            } else {
+                // Guardar en el disco 'public' para desarrollo
+                $imagePath = $request->file('image')->store($categoryDirectory, 'public');
+                // Construir la URL completa de la imagen
+                $validated['image'] = asset('storage/' . $imagePath);
+            }
         }
 
         // Creación del producto
@@ -76,5 +90,103 @@ class ProductController extends Controller
 
         // Redirigir a la lista de productos con un mensaje de éxito
         return redirect()->route('productsIndex')->with('success', 'Product created successfully.');
+    }
+
+    public function edit($id)
+    {
+        // Obtener el producto por su ID
+        $product = Product::findOrFail($id);
+
+        // Devolver la vista de edición con los datos del producto
+        return view('admin.products.products-edit', compact('product'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        // Validación de datos
+        $validated = $request->validate([
+            'order' => 'required|unique:products,order,' . $id,
+            'barcode' => 'required|unique:products,barcode,' . $id,
+            'name' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'category' => 'required|string|max:255',
+            'unit_type' => 'required|in:unit,package',
+            'purchase_price' => 'required|numeric',
+            'profit_margin' => 'required|numeric',
+            'sale_price' => 'required|numeric',
+            'stock' => 'required|integer',
+        ]);
+
+        // Obtener el producto por su ID
+        $product = Product::findOrFail($id);
+
+        // Manejo de la imagen (si se proporciona)
+        if ($request->hasFile('image')) {
+            // Crear el directorio dinámico basado en la categoría
+            $categoryDirectory = 'imgs/products/' . Str::slug($request->input('category'));
+
+            // Eliminar la imagen anterior si existe
+            if ($product->image) {
+                // Obtener la ruta relativa de la imagen
+                $existingImagePath = str_replace(
+                    env('APP_ENV') === 'production' ? env('APP_URL') . '/' : asset('storage/') . '/',
+                    '',
+                    $product->image
+                );
+
+                // Eliminar la imagen del disco correspondiente
+                if (env('APP_ENV') === 'production') {
+                    Storage::disk('custom')->delete($existingImagePath);
+                } else {
+                    Storage::disk('public')->delete($existingImagePath);
+                }
+            }
+
+            // Guardar la nueva imagen
+            if (env('APP_ENV') === 'production') {
+                $imagePath = $request->file('image')->store($categoryDirectory, 'custom');
+                // Construir la URL completa de la imagen
+                $validated['image'] = env('APP_URL') . '/' . $imagePath;
+            } else {
+                $imagePath = $request->file('image')->store($categoryDirectory, 'public');
+                // Construir la URL completa de la imagen
+                $validated['image'] = asset('storage/' . $imagePath);
+            }
+        }
+
+        // Actualizar el producto con los datos validados
+        $product->update($validated);
+
+        // Redirigir a la lista de productos con un mensaje de éxito
+        return redirect()->route('productsIndex')->with('success', 'Product updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        // Obtener el producto por su ID
+        $product = Product::findOrFail($id);
+
+        // Eliminar la imagen asociada si existe
+        if ($product->image) {
+            // Obtener la ruta relativa de la imagen
+            $existingImagePath = str_replace(
+                env('APP_ENV') === 'production' ? env('APP_URL') . '/' : asset('storage/') . '/',
+                '',
+                $product->image
+            );
+
+            // Eliminar la imagen del disco correspondiente
+            if (env('APP_ENV') === 'production') {
+                Storage::disk('custom')->delete($existingImagePath);
+            } else {
+                Storage::disk('public')->delete($existingImagePath);
+            }
+        }
+
+        // Eliminar el producto
+        $product->delete();
+
+        // Redirigir a la lista de productos con un mensaje de éxito
+        return redirect()->route('productsIndex')->with('success', 'Product deleted successfully.');
     }
 }
