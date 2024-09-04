@@ -28,9 +28,9 @@
                             </button>
                             <select name="category" id="category" class="form-select block w-full mt-1">
                                 <option value="">Todas las categorías</option>
-                                <!-- Aquí puedes agregar opciones de categorías dinámicamente si las tienes -->
-                                <option value="Category1">Categoría 1</option>
-                                <option value="Category2">Categoría 2</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category }}">{{ $category }}</option>
+                                @endforeach
                             </select>
                             <button type="submit"
                                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Filtrar</button>

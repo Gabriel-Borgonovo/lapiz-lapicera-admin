@@ -12,7 +12,14 @@ class ProductController extends Controller
     // Método para mostrar la tabla de productos
     public function index()
     {
-        return view('admin.products.products-index');
+        // Obtener todos los productos
+        $products = Product::all();
+
+        // Extraer categorías únicas de los productos
+        $categories = $products->pluck('category')->unique()->sort();
+
+        // Pasar productos y categorías a la vista
+        return view('admin.products.products-index', compact('products', 'categories'));
     }
 
     //Obtener productos en formato JSON
@@ -31,7 +38,7 @@ class ProductController extends Controller
         }
 
         if ($category) {
-            $query->where('category_id', $category);
+            $query->where('category', $category);
         }
 
         $products = $query->paginate(10);
