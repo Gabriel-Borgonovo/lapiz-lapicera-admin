@@ -41,8 +41,8 @@
                     <table id="products-table" class="w-full bg-white min-600">
                         <thead>
                             <tr>
-                                <th class="p-2 text-start">{{ __('ID') }}</th>
                                 <th class="p-2 text-start">{{ __('Orden') }}</th>
+                                <th class="p-2 text-start">{{ __('image') }}</th>
                                 <th class="p-2 text-start">{{ __('Código de Barras') }}</th>
                                 <th class="p-2 text-start">{{ __('Nombre') }}</th>
                                 <th class="p-2 text-start">{{ __('Categoría') }}</th>
@@ -90,8 +90,8 @@
                     data.products.forEach(product => {
                         const row = productsTable.insertRow();
                         row.innerHTML = `
-                    <td class="p-2">${product.id}</td>
                     <td class="p-2">${product.order}</td>
+                    <td class="p-2"><img src="${product.image}" alt="imagen producto" class="w-14" /></td>
                     <td class="p-2">${product.barcode}</td>
                     <td class="p-2 font-black text-blue-900">${product.name}</td>
                     <td class="p-2">${product.category}</td>

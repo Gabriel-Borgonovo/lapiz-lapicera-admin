@@ -58,14 +58,21 @@ class ProductController extends Controller
             'order' => 'required|unique:products',
             'barcode' => 'required|unique:products',
             'name' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'category' => 'required|string|max:255',
             'unit_type' => 'required|in:unit,package',
             'purchase_price' => 'required|numeric',
             'profit_margin' => 'required|numeric',
-            'sale_price' => 'required|numeric',
             'stock' => 'required|integer',
         ]);
+
+        // Calcular el sale_price basado en purchase_price y profit_margin
+        $purchasePrice = $validated['purchase_price'];
+        $profitMargin = $validated['profit_margin'];
+        $salePrice = $purchasePrice * (1 + ($profitMargin / 100));
+
+        // Agregar el sale_price al array de datos validados
+        $validated['sale_price'] = $salePrice;
 
         // Manejo de la imagen (si se proporciona)
         if ($request->hasFile('image')) {
@@ -108,14 +115,21 @@ class ProductController extends Controller
             'order' => 'required|unique:products,order,' . $id,
             'barcode' => 'required|unique:products,barcode,' . $id,
             'name' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'category' => 'required|string|max:255',
             'unit_type' => 'required|in:unit,package',
             'purchase_price' => 'required|numeric',
             'profit_margin' => 'required|numeric',
-            'sale_price' => 'required|numeric',
             'stock' => 'required|integer',
         ]);
+
+        // Calcular el sale_price basado en purchase_price y profit_margin
+        $purchasePrice = $validated['purchase_price'];
+        $profitMargin = $validated['profit_margin'];
+        $salePrice = $purchasePrice * (1 + ($profitMargin / 100));
+
+        // Agregar el sale_price al array de datos validados
+        $validated['sale_price'] = $salePrice;
 
         // Obtener el producto por su ID
         $product = Product::findOrFail($id);
