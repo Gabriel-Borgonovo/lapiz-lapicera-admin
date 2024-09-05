@@ -4,6 +4,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SalesController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +51,19 @@ Route::middleware('auth')->group(function () {
     Route::get('admin/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('admin/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('admin/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+    // Mostrar la lista de ventas
+    Route::get('admin/sales', [SalesController::class, 'index'])->name('sales.index');
+    Route::get('admin/sales/create', [SalesController::class, 'create'])->name('sales-create');
+    Route::get('/sales/{id}', [SalesController::class, 'show'])->name('sales-show');
+
+    // Obtener detalles de un producto por código de barras
+    Route::post('admin/sales/get-product-by-barcode', [SalesController::class, 'getProductByBarcode'])
+        ->name('sales.product-by-barcode');
+
+    // Finalizar la venta
+    Route::post('/admin/sales/finalize', [SalesController::class, 'finalizeSale'])
+        ->name('sales.finalize');
 });
 
 require __DIR__ . '/auth.php';

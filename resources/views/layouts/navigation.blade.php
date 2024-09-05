@@ -28,6 +28,15 @@
                             {{ __('Permissions') }}
                         </x-nav-link>
                     @endhasrole
+
+                    @hasrole('Jefe')
+                        <x-nav-link :href="Route('productsIndex')" :active="request()->routeIs('productsIndex')">
+                            {{ __('Products') }}
+                        </x-nav-link>
+                        <x-nav-link :href="Route('sales.index')" :active="request()->routeIs('sales.index')">
+                            {{ __('Ventas') }}
+                        </x-nav-link>
+                    @endhasrole
                 </div>
             </div>
 
