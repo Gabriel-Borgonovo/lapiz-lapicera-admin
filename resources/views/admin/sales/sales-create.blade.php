@@ -54,7 +54,7 @@
 
             barcodeInput.addEventListener('change', async function() {
                 const barcode = barcodeInput.value;
-                console.log('Barcode Scanned:', barcode); // Añade esta línea para depuración
+                console.log('Barcode Scanned:', barcode); // Para depuración
                 await fetchProduct(barcode);
                 barcodeInput.value = ''; // Limpiar el campo
             });
@@ -76,10 +76,12 @@
                 });
 
                 const product = await response.json();
-                console.log('Fetched Product:', product); // Añade esta línea para depuración
+                console.log('Fetched Product:', product); // Para depuración
 
                 if (product.error) {
-                    alert(product.error);
+                    alert(product.error); // Mostrar mensaje de error si no hay stock
+                } else if (product.stock <= 0) {
+                    alert('El producto no tiene stock disponible.'); // Verificar el stock en el frontend
                 } else {
                     addProductToList(product);
                 }
@@ -92,20 +94,30 @@
             const existingProduct = products.find(p => p.id === product.id);
 
             if (existingProduct) {
-                existingProduct.quantity++;
-                existingProduct.totalPrice = (existingProduct.quantity * existingProduct.unit_price).toFixed(2);
+                // Verifica si hay suficiente stock para agregar más unidades
+                if (existingProduct.quantity < product.stock) {
+                    existingProduct.quantity++;
+                    existingProduct.totalPrice = (existingProduct.quantity * existingProduct.unit_price).toFixed(2);
+                } else {
+                    alert(`No hay suficiente stock disponible para ${product.name}. Stock disponible: ${product.stock}.`);
+                }
             } else {
-                const newProduct = {
-                    id: product.id,
-                    name: product.name,
-                    quantity: 1,
-                    unit_price: product.sale_price,
-                    totalPrice: product.sale_price
-                };
-                products.push(newProduct);
+                // Agregar el producto si no existe aún y hay stock disponible
+                if (product.stock > 0) {
+                    const newProduct = {
+                        id: product.id,
+                        name: product.name,
+                        quantity: 1,
+                        unit_price: product.sale_price,
+                        totalPrice: product.sale_price
+                    };
+                    products.push(newProduct);
+                } else {
+                    alert('El producto no tiene stock disponible.');
+                }
             }
 
-            console.log('Products List:', products); // Añade esta línea para depuración
+            console.log('Products List:', products); // Para depuración
 
             renderProductList();
             updateTotalAmount();
