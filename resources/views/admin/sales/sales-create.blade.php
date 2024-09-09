@@ -48,10 +48,10 @@
         const productList = document.getElementById('productList');
         const totalAmountElement = document.getElementById('totalAmount');
         let totalAmount = 0;
-
+    
         document.addEventListener('DOMContentLoaded', function() {
             barcodeInput.focus();
-
+    
             barcodeInput.addEventListener('change', async function() {
                 const barcode = barcodeInput.value;
                 console.log('Barcode Scanned:', barcode); // Para depuración
@@ -59,25 +59,21 @@
                 barcodeInput.value = ''; // Limpiar el campo
             });
         });
-
-        // Modificar la función fetchProduct para ser asíncrona
+    
         async function fetchProduct(barcode) {
             try {
                 const response = await fetch(`/admin/sales/get-product-by-barcode`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content')
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
-                    body: JSON.stringify({
-                        barcode: barcode
-                    })
+                    body: JSON.stringify({ barcode: barcode })
                 });
-
+    
                 const product = await response.json();
                 console.log('Fetched Product:', product); // Para depuración
-
+    
                 if (product.error) {
                     alert(product.error); // Mostrar mensaje de error si no hay stock
                 } else if (product.stock <= 0) {
@@ -89,12 +85,11 @@
                 console.error('Fetch error:', error);
             }
         }
-
+    
         function addProductToList(product) {
             const existingProduct = products.find(p => p.id === product.id);
-
+    
             if (existingProduct) {
-                // Verifica si hay suficiente stock para agregar más unidades
                 if (existingProduct.quantity < product.stock) {
                     existingProduct.quantity++;
                     existingProduct.totalPrice = (existingProduct.quantity * existingProduct.unit_price).toFixed(2);
@@ -102,13 +97,13 @@
                     alert(`No hay suficiente stock disponible para ${product.name}. Stock disponible: ${product.stock}.`);
                 }
             } else {
-                // Agregar el producto si no existe aún y hay stock disponible
                 if (product.stock > 0) {
                     const newProduct = {
                         id: product.id,
                         name: product.name,
                         quantity: 1,
                         unit_price: product.sale_price,
+                        stock: product.stock, // Almacenar el stock para validaciones
                         totalPrice: product.sale_price
                     };
                     products.push(newProduct);
@@ -116,54 +111,80 @@
                     alert('El producto no tiene stock disponible.');
                 }
             }
-
+    
             console.log('Products List:', products); // Para depuración
-
             renderProductList();
             updateTotalAmount();
         }
-
+    
         function renderProductList() {
             productList.innerHTML = '';
             products.forEach(product => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td class="p-2">${product.name}</td>
-            <td class="p-2">${product.quantity}</td>
-            <td class="p-2">$${product.unit_price}</td>
-            <td class="p-2">$${product.totalPrice}</td>
-        `;
+                    <td class="p-2">${product.name}</td>
+                    <td class="p-2 flex items-center space-x-2">
+                        <button onclick="decreaseQuantity(${product.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded">-</button>
+                        <span class="text-center w-8">${product.quantity}</span>
+                        <button onclick="increaseQuantity(${product.id})" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-2 rounded">+</button>
+                    </td>
+                    <td class="p-2">$${product.unit_price}</td>
+                    <td class="p-2">$${product.totalPrice}</td>
+                `;
                 productList.appendChild(row);
             });
         }
-
+    
         function updateTotalAmount() {
             totalAmount = products.reduce((sum, product) => sum + parseFloat(product.totalPrice), 0).toFixed(2);
             totalAmountElement.innerText = totalAmount;
         }
-
+    
+        function increaseQuantity(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product.quantity < product.stock) {
+                product.quantity++;
+                product.totalPrice = (product.quantity * product.unit_price).toFixed(2);
+            } else {
+                alert(`No hay suficiente stock disponible para ${product.name}. Stock disponible: ${product.stock}.`);
+            }
+            renderProductList();
+            updateTotalAmount();
+        }
+    
+        function decreaseQuantity(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product.quantity > 1) {
+                product.quantity--;
+                product.totalPrice = (product.quantity * product.unit_price).toFixed(2);
+            } else {
+                alert('No puedes tener menos de 1 producto.');
+            }
+            renderProductList();
+            updateTotalAmount();
+        }
+    
         async function finalizeSale() {
             if (products.length === 0) {
                 alert('No products in the sale.');
                 return;
             }
-
+    
             const saleData = {
                 products: products,
                 totalAmount: totalAmount
             };
-
+    
             try {
                 const response = await fetch(`/admin/sales/finalize`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content')
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify(saleData)
                 });
-
+    
                 const data = await response.json();
                 if (data.success) {
                     alert('Sale finalized successfully!');
@@ -177,4 +198,5 @@
             }
         }
     </script>
+    
 </x-app-layout>

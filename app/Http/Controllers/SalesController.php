@@ -13,10 +13,35 @@ class SalesController extends Controller
     // Mostrar la lista de ventas
     public function index()
     {
-        $sales = Sale::with('saleItems.product')->get();
+        $sales = Sale::with('saleItems.product')
+            ->orderBy('created_at', 'desc') // Ordenar por fecha de creación en orden descendente
+            ->get();
         return view('admin.sales.sales-index', compact('sales'));
     }
 
+    // Eliminar una venta
+    public function destroy($id)
+    {
+        $sale = Sale::findOrFail($id);
+
+        // Reintegra los elementos asociados a la venta al stock
+        foreach ($sale->saleItems as $saleItem) {
+            $product = Product::find($saleItem->product_id);
+            if ($product) {
+                $product->increment('stock', $saleItem->quantity);
+            }
+        }
+
+        // Elimina los elementos asociados a la venta
+        $sale->saleItems()->delete();
+
+        // Elimina la venta
+        $sale->delete();
+
+        return redirect()->route('sales.index')->with('success', 'Sale deleted and stock restored successfully.');
+    }
+
+    //vista para crear una venta
     public function create()
     {
         $sales = Sale::with('saleItems.product')->get();
