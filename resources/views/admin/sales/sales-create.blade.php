@@ -49,46 +49,43 @@
         const totalAmountElement = document.getElementById('totalAmount');
         let totalAmount = 0;
 
-        barcodeInput.addEventListener('change', function() {
-            const barcode = barcodeInput.value;
-            console.log('Barcode Scanned:', barcode); // Añade esta línea para depuración
-            fetchProduct(barcode);
-            barcodeInput.value = '';
-        });
-
         document.addEventListener('DOMContentLoaded', function() {
             barcodeInput.focus();
 
-            barcodeInput.addEventListener('change', function() {
+            barcodeInput.addEventListener('change', async function() {
                 const barcode = barcodeInput.value;
-                fetchProduct(barcode);
-                barcodeInput.value = '';
+                console.log('Barcode Scanned:', barcode); // Añade esta línea para depuración
+                await fetchProduct(barcode);
+                barcodeInput.value = ''; // Limpiar el campo
             });
         });
 
-        function fetchProduct(barcode) {
-            fetch(`/admin/sales/get-product-by-barcode`, {
+        // Modificar la función fetchProduct para ser asíncrona
+        async function fetchProduct(barcode) {
+            try {
+                const response = await fetch(`/admin/sales/get-product-by-barcode`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
                     },
                     body: JSON.stringify({
                         barcode: barcode
                     })
-                })
-                .then(response => response.json())
-                .then(product => {
-                    console.log('Fetched Product:', product); // Añade esta línea para depuración
-                    if (product.error) {
-                        alert(product.error);
-                    } else {
-                        addProductToList(product);
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
                 });
+
+                const product = await response.json();
+                console.log('Fetched Product:', product); // Añade esta línea para depuración
+
+                if (product.error) {
+                    alert(product.error);
+                } else {
+                    addProductToList(product);
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
         }
 
         function addProductToList(product) {
@@ -133,7 +130,7 @@
             totalAmountElement.innerText = totalAmount;
         }
 
-        function finalizeSale() {
+        async function finalizeSale() {
             if (products.length === 0) {
                 alert('No products in the sale.');
                 return;
@@ -144,29 +141,28 @@
                 totalAmount: totalAmount
             };
 
-            fetch(`/admin/sales/finalize`, {
+            try {
+                const response = await fetch(`/admin/sales/finalize`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
                     },
                     body: JSON.stringify(saleData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Sale finalized successfully!');
-                        // Redirigir al índice de ventas
-                        window.location.href = data.redirect_url; // Aquí se redirige al index de ventas
-                    } else {
-                        // Mostrar el mensaje de error específico si está disponible
-                        alert(data.error || 'There was an error finalizing the sale.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An unexpected error occurred.');
                 });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Sale finalized successfully!');
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert(data.error || 'There was an error finalizing the sale.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An unexpected error occurred.');
+            }
         }
     </script>
 </x-app-layout>
