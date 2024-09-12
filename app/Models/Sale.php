@@ -14,6 +14,9 @@ class Sale extends Model
         'client_name',
         'client_company',
         'total_amount',
+        'total_before_adjustments',
+        'discount_percent',
+        'surcharge_percent'
     ];
 
     public function user()

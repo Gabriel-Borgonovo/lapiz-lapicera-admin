@@ -15,7 +15,8 @@
                             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                             {{ __('Crear nueva venta') }}
                         </a>
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ __('Historial de ventas') }}</h3>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                            {{ __('Historial de ventas') }}</h3>
                     </div>
                     <table class="w-full bg-white">
                         <thead>
@@ -39,11 +40,19 @@
                                             {{ __('Ver detalles') }}
                                         </a>
 
+                                        <!-- Enlace para editar la venta -->
+                                        <a href="{{ route('sales-edit', $sale->id) }}"
+                                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded">
+                                            {{ __('Editar') }}
+                                        </a>
+
                                         <!-- Formulario para eliminar la venta -->
-                                        <form action="{{ route('sales-destroy', $sale->id) }}" method="POST" onsubmit="return confirm('Estás seguro que quieres eliminar esta venta?');">
+                                        <form action="{{ route('sales-destroy', $sale->id) }}" method="POST"
+                                            onsubmit="return confirm('Estás seguro que quieres eliminar esta venta?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded">
+                                            <button type="submit"
+                                                class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded">
                                                 {{ __('Eliminar') }}
                                             </button>
                                         </form>

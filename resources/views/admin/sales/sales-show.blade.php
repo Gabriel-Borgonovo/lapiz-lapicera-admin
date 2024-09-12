@@ -1,3 +1,4 @@
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
@@ -9,34 +10,44 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <h3 class="text-lg font-semibold">{{ __('Sale ID: ') }}{{ $sale->id }}</h3>
-                    <p>{{ __('Client Name: ') }}{{ $sale->client_name ?? 'N/A' }}</p>
-                    <p>{{ __('Client Company: ') }}{{ $sale->client_company ?? 'N/A' }}</p>
-                    <p>{{ __('Total Amount: $') }}{{ $sale->total_amount }}</p>
-                    <p>{{ __('Date: ') }}{{ $sale->created_at->format('d-m-Y') }}</p>
+                    <!-- Información de la venta -->
+                    <h3 class="text-lg font-semibold mb-4">{{ __('Venta n°: ') }}{{ $sale->id }}</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <p>{{ __('Nombre del cliente: ') }}{{ $sale->client_name ?? 'N/A' }}</p>
+                        <p>{{ __('Nombre de la Empresa: ') }}{{ $sale->client_company ?? 'N/A' }}</p>
+                        <p>{{ __('Fecha: ') }}{{ $sale->created_at->format('d-m-Y') }}</p>
+                    </div>
 
                     <!-- Lista de productos en la venta -->
-                    <h4 class="text-lg font-semibold mt-4">{{ __('Products') }}</h4>
-                    <table class="w-full bg-white">
-                        <thead>
-                            <tr>
-                                <th class="p-2 text-start">Product Name</th>
-                                <th class="p-2 text-start">Quantity</th>
-                                <th class="p-2 text-start">Unit Price</th>
-                                <th class="p-2 text-start">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($sale->saleItems as $item)
-                                <tr>
-                                    <td class="p-2">{{ $item->product->name }}</td>
-                                    <td class="p-2">{{ $item->quantity }}</td>
-                                    <td class="p-2">$ {{ $item->unit_price }}</td>
-                                    <td class="p-2">$ {{ $item->quantity * $item->unit_price }}</td>
+                    <h4 class="text-lg font-semibold mt-6 mb-4">{{ __('Productos') }}</h4>
+                    <div class="border border-gray-300 rounded-lg p-4">
+                        <table class="w-full table-auto border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 dark:bg-gray-700">
+                                    <th class="p-2 text-left border-b">Producto</th>
+                                    <th class="p-2 text-left border-b">Cantidad</th>
+                                    <th class="p-2 text-left border-b">Precio unitario</th>
+                                    <th class="p-2 text-left border-b">Subtotal</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach ($sale->saleItems as $item)
+                                    <tr>
+                                        <td class="p-2 border-b">{{ $item->product->name }}</td>
+                                        <td class="p-2 border-b">{{ $item->quantity }}</td>
+                                        <td class="p-2 border-b">$ {{ number_format($item->unit_price, 2) }}</td>
+                                        <td class="p-2 border-b">$ {{ number_format($item->quantity * $item->unit_price, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-gray-200 dark:bg-gray-700">
+                                    <td colspan="3" class="p-2 text-right font-bold border-t-2 border-gray-300">{{ __('Total Amount:') }}</td>
+                                    <td class="p-2 font-bold border-t-2 border-gray-300 text-lg text-gray-900">$ {{ number_format($sale->total_amount, 2) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

@@ -58,6 +58,10 @@
                             onclick="finalizeSale()">
                             {{ __('Finalize Sale') }}
                         </button>
+
+                        <!-- Campos ocultos para pasar descuentos y recargos al backend -->
+                        <input type="hidden" id="discountValue" name="discountValue">
+                        <input type="hidden" id="surchargeValue" name="surchargeValue">
                     </div>
                 </div>
             </div>
@@ -70,6 +74,7 @@
             const productList = document.getElementById('productList');
             const totalAmountElement = document.getElementById('totalAmount');
             let totalAmount = 0;
+            let totalAmountBeforeChanges = 0; // Total original sin cambios
             let discountPercent = 0;
             let surchargePercent = 0;
 
@@ -90,6 +95,10 @@
 
                     discountPercent = discountInput;
                     surchargePercent = surchargeInput;
+
+                    // Actualizar los campos ocultos con los valores de descuento y recargo
+                    document.getElementById('discountValue').value = discountPercent;
+                    document.getElementById('surchargeValue').value = surchargePercent;
 
                     updateTotalAmount();
                 });
@@ -160,25 +169,34 @@
                 products.forEach(product => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-            <td class="p-2">${product.name}</td>
-            <td class="p-2 flex items-center space-x-2">
-                <button onclick="decreaseQuantity(${product.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded">-</button>
-                <span class="text-center w-8">${product.quantity}</span>
-                <button onclick="increaseQuantity(${product.id})" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-2 rounded">+</button>
-            </td>
-            <td class="p-2">$${product.unit_price}</td>
-            <td class="p-2">$${product.totalPrice}</td>
-        `;
+                <td class="p-2">${product.name}</td>
+                <td class="p-2 flex items-center space-x-2">
+                    <button onclick="decreaseQuantity(${product.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded">-</button>
+                    <span class="text-center w-8">${product.quantity}</span>
+                    <button onclick="increaseQuantity(${product.id})" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-2 rounded">+</button>
+                </td>
+                <td class="p-2">$${product.unit_price}</td>
+                <td class="p-2">$${product.totalPrice}</td>
+            `;
                     productList.appendChild(row);
                 });
             }
 
             function updateTotalAmount() {
-                totalAmount = products.reduce((sum, product) => sum + parseFloat(product.totalPrice), 0).toFixed(2);
-                // Aplicar descuento y recargo como porcentajes
-                const discountAmount = (totalAmount * (discountPercent / 100)).toFixed(2);
-                const surchargeAmount = (totalAmount * (surchargePercent / 100)).toFixed(2);
-                totalAmount = (totalAmount - discountAmount + parseFloat(surchargeAmount)).toFixed(2);
+                // Calcular el total sin ajustes (antes de aplicar descuentos o recargos)
+                totalAmountBeforeChanges = products.reduce((sum, product) => sum + parseFloat(product.totalPrice), 0).toFixed(
+                    2);
+
+                // Calcular descuento
+                const discountAmount = (totalAmountBeforeChanges * (discountPercent / 100)).toFixed(2);
+
+                // Calcular recargo
+                const surchargeAmount = (totalAmountBeforeChanges * (surchargePercent / 100)).toFixed(2);
+
+                // Calcular el total ajustado aplicando descuento y recargo
+                totalAmount = (parseFloat(totalAmountBeforeChanges) - discountAmount + parseFloat(surchargeAmount)).toFixed(2);
+
+                // Actualizar visualmente el total en la página
                 totalAmountElement.innerText = `$${totalAmount}`;
             }
 
@@ -208,17 +226,20 @@
 
             async function finalizeSale() {
                 if (products.length === 0) {
-                    alert('No products in the sale.');
+                    alert('No hay productos en la venta.');
                     return;
                 }
 
                 const saleData = {
                     products: products,
-                    totalAmount: totalAmount
+                    totalAmountBeforeChanges: totalAmountBeforeChanges, // Total original sin ajustes
+                    totalAmount: totalAmount, // Total ajustado
+                    discountPercent: discountPercent,
+                    surchargePercent: surchargePercent
                 };
 
                 try {
-                    const response = await fetch(`/admin/sales/finalize`, {
+                    const response = await fetch(`${window.location.origin}/admin/sales/finalize`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -228,16 +249,21 @@
                         body: JSON.stringify(saleData)
                     });
 
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
                     const data = await response.json();
+
                     if (data.success) {
-                        alert('Sale finalized successfully!');
+                        alert('¡Venta finalizada con éxito!');
                         window.location.href = data.redirect_url;
                     } else {
-                        alert(data.error || 'There was an error finalizing the sale.');
+                        alert(data.error || 'Hubo un error al finalizar la venta.');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('An unexpected error occurred.');
+                    alert('Ocurrió un error inesperado. Verifica la consola para más detalles.');
                 }
             }
         </script>

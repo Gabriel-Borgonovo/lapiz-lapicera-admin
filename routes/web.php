@@ -6,11 +6,17 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Route::get('/test-log', function () {
+//     Log::info('Este es un mensaje de prueba en el log.');
+//     return 'Mensaje de log enviado.';
+// });
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -55,7 +61,10 @@ Route::middleware('auth')->group(function () {
     // Mostrar la lista de ventas
     Route::get('admin/sales', [SalesController::class, 'index'])->name('sales.index');
     Route::get('admin/sales/create', [SalesController::class, 'create'])->name('sales-create');
-    Route::get('/sales/{id}', [SalesController::class, 'show'])->name('sales-show');
+    Route::get('admin/sales/{id}', [SalesController::class, 'show'])->name('sales-show');
+    Route::get('admin/sales/{id}/edit', [SalesController::class, 'edit'])->name('sales-edit');
+    Route::put('admin/sales/{id}', [SalesController::class, 'update'])->name('sales-update');
+
     Route::delete('/admin/sales/{id}', [SalesController::class, 'destroy'])->name('sales-destroy');
 
 
@@ -64,7 +73,7 @@ Route::middleware('auth')->group(function () {
         ->name('sales.product-by-barcode');
 
     // Finalizar la venta
-    Route::post('/admin/sales/finalize', [SalesController::class, 'finalizeSale'])
+    Route::post('admin/sales/finalize', [SalesController::class, 'finalizeSale'])
         ->name('sales.finalize');
 });
 

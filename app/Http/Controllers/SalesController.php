@@ -7,6 +7,8 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
 
 class SalesController extends Controller
 {
@@ -17,6 +19,25 @@ class SalesController extends Controller
             ->orderBy('created_at', 'desc') // Ordenar por fecha de creación en orden descendente
             ->get();
         return view('admin.sales.sales-index', compact('sales'));
+    }
+
+    public function edit($id)
+    {
+        $sale = Sale::findOrFail($id);
+        return view('admin.sales.sales-edit', compact('sale'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'client_name' => 'nullable|string|max:255',
+            'client_company' => 'nullable|string|max:255',
+        ]);
+
+        $sale = Sale::findOrFail($id);
+        $sale->update($data);
+
+        return redirect()->route('sales.index')->with('success', 'Venta actualizada correctamente.');
     }
 
     // Eliminar una venta
@@ -74,39 +95,64 @@ class SalesController extends Controller
     }
 
     // Finalizar una venta y almacenar en la base de datos
+
     public function finalizeSale(Request $request)
     {
+        Log::info('Inicio del método finalizeSale');
+    
         $data = $request->validate([
             'products' => 'required|array',
-            'totalAmount' => 'required|numeric'
+            'totalAmountBeforeChanges' => 'required|numeric', // Total antes de ajustes
+            'totalAmount' => 'required|numeric', // Total después de ajustes
+            'discountPercent' => 'nullable|numeric',
+            'surchargePercent' => 'nullable|numeric'
         ]);
-
-        // Crear la venta
+    
         $user = Auth::user();
         if (!$user) {
             return response()->json(['error' => 'Usuario no autenticado.'], 401);
         }
-
+    
+        $totalBeforeAdjustments = $data['totalAmountBeforeChanges']; // Total original sin ajustes
+        $discountPercent = $data['discountPercent'] ?? 0;
+        $surchargePercent = $data['surchargePercent'] ?? 0;
+    
+        // Calcula descuento y recargo para control (en el backend)
+        $discountAmount = ($totalBeforeAdjustments * $discountPercent) / 100;
+        $surchargeAmount = ($totalBeforeAdjustments * $surchargePercent) / 100;
+    
+        // Verifica que el total ajustado del frontend coincide con lo calculado en el backend
+        $calculatedTotal = $totalBeforeAdjustments - $discountAmount + $surchargeAmount;
+        if (abs($calculatedTotal - $data['totalAmount']) > 0.01) {
+            return response()->json(['error' => 'El total ajustado no coincide con el cálculo.'], 400);
+        }
+    
+        // Crear la venta
         $sale = Sale::create([
             'user_id' => $user->id,
-            'total_amount' => $data['totalAmount']
+            'total_amount' => $data['totalAmount'], // Total después de ajustes
+            'discount_percent' => $discountPercent,
+            'surcharge_percent' => $surchargePercent,
+            'total_before_adjustments' => $totalBeforeAdjustments, // Total antes de ajustes
         ]);
-
-        // Agregar los productos a la venta
+    
         foreach ($data['products'] as $productData) {
+            $product = Product::find($productData['id']);
+    
+            if (!$product) {
+                return response()->json(['error' => 'Product not found: ' . $productData['id']], 400);
+            }
+    
             SaleItem::create([
                 'sale_id' => $sale->id,
                 'product_id' => $productData['id'],
                 'quantity' => $productData['quantity'],
                 'unit_price' => $productData['unit_price']
             ]);
-
-            // Restar la cantidad de productos comprados del stock
-            $product = Product::find($productData['id']);
+    
             $product->decrement('stock', $productData['quantity']);
         }
-
-        // Devolver una respuesta JSON para manejar la redirección en el front-end
+    
         return response()->json(['success' => true, 'redirect_url' => route('sales.index')]);
     }
 }
