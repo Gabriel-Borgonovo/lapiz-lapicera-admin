@@ -5,6 +5,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +76,14 @@ Route::middleware('auth')->group(function () {
     // Finalizar la venta
     Route::post('admin/sales/finalize', [SalesController::class, 'finalizeSale'])
         ->name('sales.finalize');
+
+
+    // Rutas para generar tickets
+    Route::get('admin/tickets', [TicketController::class, 'index'])->name('tickets.index');
+    Route::get('admin/tickets/generate/{saleId}', [TicketController::class, 'generate'])->name('tickets.generate');
+    Route::get('admin/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
+    Route::get('admin/tickets/download/{id}', [TicketController::class, 'download'])->name('tickets.download');
+    Route::delete('admin/tickets/{id}', [TicketController::class, 'destroy'])->name('tickets.destroy');
 });
 
 require __DIR__ . '/auth.php';

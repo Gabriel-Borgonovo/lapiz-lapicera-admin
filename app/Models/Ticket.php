@@ -24,4 +24,5 @@ class Ticket extends Model
     {
         return $this->hasMany(TicketItem::class);
     }
+
 }
