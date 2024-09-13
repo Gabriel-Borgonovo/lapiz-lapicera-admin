@@ -8,7 +8,7 @@ use App\Models\SaleItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Storage;
 
 class SalesController extends Controller
 {
@@ -41,6 +41,26 @@ class SalesController extends Controller
     }
 
     // Eliminar una venta
+    // public function destroy($id)
+    // {
+    //     $sale = Sale::findOrFail($id);
+
+    //     // Reintegra los elementos asociados a la venta al stock
+    //     foreach ($sale->saleItems as $saleItem) {
+    //         $product = Product::find($saleItem->product_id);
+    //         if ($product) {
+    //             $product->increment('stock', $saleItem->quantity);
+    //         }
+    //     }
+
+    //     // Elimina los elementos asociados a la venta
+    //     $sale->saleItems()->delete();
+
+    //     // Elimina la venta
+    //     $sale->delete();
+
+    //     return redirect()->route('sales.index')->with('success', 'Sale deleted and stock restored successfully.');
+    // }
     public function destroy($id)
     {
         $sale = Sale::findOrFail($id);
@@ -53,14 +73,28 @@ class SalesController extends Controller
             }
         }
 
+        // Elimina el ticket asociado a la venta (si existe)
+        if ($sale->ticket) {
+            // Elimina el archivo PDF del ticket si existe
+            if ($sale->ticket->pdf_path && Storage::disk('public')->exists($sale->ticket->pdf_path)) {
+                Storage::disk('public')->delete($sale->ticket->pdf_path); // Eliminamos el archivo del disco 'public'
+            }
+
+            // Elimina el registro del ticket
+            $sale->ticket->delete();
+        }
+
         // Elimina los elementos asociados a la venta
         $sale->saleItems()->delete();
 
         // Elimina la venta
         $sale->delete();
 
-        return redirect()->route('sales.index')->with('success', 'Sale deleted and stock restored successfully.');
+        return redirect()->route('sales.index')->with('success', 'Sale, associated ticket, PDF, and stock restored successfully.');
     }
+
+
+    /******************************************** */
 
     //vista para crear una venta
     public function create()
@@ -99,7 +133,7 @@ class SalesController extends Controller
     public function finalizeSale(Request $request)
     {
         Log::info('Inicio del método finalizeSale');
-    
+
         $data = $request->validate([
             'products' => 'required|array',
             'totalAmountBeforeChanges' => 'required|numeric', // Total antes de ajustes
@@ -107,26 +141,26 @@ class SalesController extends Controller
             'discountPercent' => 'nullable|numeric',
             'surchargePercent' => 'nullable|numeric'
         ]);
-    
+
         $user = Auth::user();
         if (!$user) {
             return response()->json(['error' => 'Usuario no autenticado.'], 401);
         }
-    
+
         $totalBeforeAdjustments = $data['totalAmountBeforeChanges']; // Total original sin ajustes
         $discountPercent = $data['discountPercent'] ?? 0;
         $surchargePercent = $data['surchargePercent'] ?? 0;
-    
+
         // Calcula descuento y recargo para control (en el backend)
         $discountAmount = ($totalBeforeAdjustments * $discountPercent) / 100;
         $surchargeAmount = ($totalBeforeAdjustments * $surchargePercent) / 100;
-    
+
         // Verifica que el total ajustado del frontend coincide con lo calculado en el backend
         $calculatedTotal = $totalBeforeAdjustments - $discountAmount + $surchargeAmount;
         if (abs($calculatedTotal - $data['totalAmount']) > 0.01) {
             return response()->json(['error' => 'El total ajustado no coincide con el cálculo.'], 400);
         }
-    
+
         // Crear la venta
         $sale = Sale::create([
             'user_id' => $user->id,
@@ -135,24 +169,24 @@ class SalesController extends Controller
             'surcharge_percent' => $surchargePercent,
             'total_before_adjustments' => $totalBeforeAdjustments, // Total antes de ajustes
         ]);
-    
+
         foreach ($data['products'] as $productData) {
             $product = Product::find($productData['id']);
-    
+
             if (!$product) {
                 return response()->json(['error' => 'Product not found: ' . $productData['id']], 400);
             }
-    
+
             SaleItem::create([
                 'sale_id' => $sale->id,
                 'product_id' => $productData['id'],
                 'quantity' => $productData['quantity'],
                 'unit_price' => $productData['unit_price']
             ]);
-    
+
             $product->decrement('stock', $productData['quantity']);
         }
-    
+
         return response()->json(['success' => true, 'redirect_url' => route('sales.index')]);
     }
 }
