@@ -1,4 +1,3 @@
-
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
@@ -49,11 +48,20 @@
                         </table>
                     </div>
 
-                     <!-- Botón para generar ticket -->
-                     <div class="mt-6">
-                        <a href="{{ route('tickets.generate', $sale->id) }}" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            {{ __('Generar Ticket') }}
-                        </a>
+                    <!-- Botón para generar ticket o mensaje si ya existe -->
+                    <div class="mt-6">
+                        @if ($sale->ticket)
+                            <!-- Ticket ya generado -->
+                            <button class="inline-block bg-gray-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed" disabled>
+                                {{ __('Ticket generado') }}
+                            </button>
+                            <span class="text-gray-500 ml-2">{{ __('Esta venta ya tiene un ticket asociado.') }}</span>
+                        @else
+                            <!-- Botón para generar ticket si no existe -->
+                            <a href="{{ route('tickets.generate', $sale->id) }}" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                {{ __('Generar Ticket') }}
+                            </a>
+                        @endif
                     </div>
                     
                 </div>

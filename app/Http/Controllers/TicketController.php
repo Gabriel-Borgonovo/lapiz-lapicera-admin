@@ -38,11 +38,19 @@ class TicketController extends Controller
         return redirect()->route('tickets.index')->with('success', 'Ticket eliminado correctamente.');
     }
 
+
+    /************************************************************************ */
+    
     // Método para generar un ticket en PDF y guardarlo
     public function generate($saleId)
     {
         // Encuentra la venta por ID
         $sale = Sale::with('saleItems.product')->findOrFail($saleId);
+
+        // Verifica si ya existe un ticket para esta venta
+        if ($sale->ticket) {
+            return redirect()->route('tickets.show', $sale->ticket->id)->with('error', 'Ya existe un ticket para esta venta.');
+        }
 
         // Generar el ticket (aquí podrías tener lógica adicional para numerar el ticket, etc.)
         $ticketNumber = uniqid('ticket_'); // O alguna otra lógica para generar el número único del ticket

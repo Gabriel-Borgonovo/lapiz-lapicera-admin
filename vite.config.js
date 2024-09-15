@@ -11,4 +11,7 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    build: {
+        outDir: 'public/build', // La carpeta donde se generarán los archivos compilados.
+      },
 });
