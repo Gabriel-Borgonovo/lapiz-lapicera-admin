@@ -42,24 +42,24 @@
                                 @endforeach
 
                                 <!-- Recargo o Descuento -->
-                                @if ($ticket->sale->surcharge_percent  > 0)
+                                @if ($ticket->sale->surcharge_percent > 0)
                                     <tr>
                                         <td class="p-2 border-b">
-                                            {{ __('Recargo del ') }}{{ $ticket->sale->surcharge_percent }}% 
+                                            {{ __('Recargo del ') }}{{ $ticket->sale->surcharge_percent }}%
                                             {{ __(' por pago con tarjeta y/o QR.') }}
                                         </td>
                                         <td class="p-2 border-b text-right">
-                                            ${{ number_format($ticket->sale->total_amount * ($ticket->sale->surcharge_percent / 100), 2) }}
+                                            ${{ number_format($ticket->sale->saleItems->sum(fn($item) => $item->quantity * $item->unit_price) * ($ticket->sale->surcharge_percent / 100), 2) }}
                                         </td>
                                     </tr>
-                                @elseif ($ticket->sale->discount_percent  > 0)
+                                @elseif ($ticket->sale->discount_percent > 0)
                                     <tr>
-                                        <td class="p-2 border-b text-green-500">
-                                            {{ __('Descuento del ') }}{{ $ticket->sale->discount_percent }}% 
+                                        <td class="p-2 border-b">
+                                            {{ __('Descuento del ') }}{{ $ticket->sale->discount_percent }}%
                                             {{ __(' por promoción vigente.') }}
                                         </td>
-                                        <td class="p-2 border-b text-right text-green-500">
-                                            -${{ number_format($ticket->sale->total_amount * ($ticket->sale->discount_percent / 100), 2) }}
+                                        <td class="p-2 border-b text-right">
+                                            -${{ number_format($ticket->sale->saleItems->sum(fn($item) => $item->quantity * $item->unit_price) * ($ticket->sale->discount_percent / 100), 2) }}
                                         </td>
                                     </tr>
                                 @endif
@@ -67,8 +67,10 @@
                             <tfoot>
                                 <!-- Total -->
                                 <tr class="bg-gray-200 dark:bg-gray-700">
-                                    <td class="p-2 text-right font-bold border-t-2 border-gray-300">{{ __('Monto Total:') }}</td>
-                                    <td class="p-2 font-bold border-t-2 border-gray-300 text-right text-lg text-gray-900">
+                                    <td class="p-2 text-right font-bold border-t-2 border-gray-300">
+                                        {{ __('Monto Total:') }}</td>
+                                    <td
+                                        class="p-2 font-bold border-t-2 border-gray-300 text-right text-lg text-gray-900">
                                         ${{ number_format($ticket->sale->total_amount, 2) }}
                                     </td>
                                 </tr>
@@ -78,7 +80,8 @@
 
                     <!-- Botón para descargar el PDF -->
                     <div class="mt-6">
-                        <a href="{{ route('tickets.download', $ticket->id) }}" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        <a href="{{ route('tickets.download', $ticket->id) }}"
+                            class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                             {{ __('Descargar Ticket') }}
                         </a>
                     </div>
@@ -87,5 +90,3 @@
         </div>
     </div>
 </x-app-layout>
-
-
