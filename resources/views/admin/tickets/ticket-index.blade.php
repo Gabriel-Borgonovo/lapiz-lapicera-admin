@@ -97,8 +97,8 @@
                         <td class="border border-gray-300 px-4 py-2">$${parseFloat(ticket.sale.total_amount).toFixed(2)}</td>
                         <td class="border border-gray-300 px-4 py-2">${new Date(ticket.created_at).toLocaleDateString()}</td>
                         <td class="border border-gray-300 px-4 py-2 text-center">
-                            <a href="/tickets/${ticket.id}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">Ver</a>
-                            <a href="/tickets/${ticket.id}/download" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-4 rounded ml-2">PDF</a>
+                            <a href="/admin/tickets/${ticket.id}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">Ver</a>
+                            <a href="/admin/tickets/${ticket.id}/download" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-4 rounded ml-2">PDF</a>
                             <form action="/admin/tickets/${ticket.id}" method="POST" class="inline-block ml-2">
                                 @csrf
                                 @method('DELETE')

@@ -42,6 +42,9 @@ class TicketController extends Controller
             });
         }
 
+        // Ordenar por fecha de creación en orden descendente
+        $query->orderBy('created_at', 'desc');
+
         // Obtener los tickets filtrados o todos los tickets si no hay filtros
         $tickets = $query->get();
 

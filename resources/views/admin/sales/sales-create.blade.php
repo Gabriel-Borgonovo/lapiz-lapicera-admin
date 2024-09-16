@@ -23,6 +23,7 @@
                                 <th class="p-2 text-start">Quantity</th>
                                 <th class="p-2 text-start">Unit Price</th>
                                 <th class="p-2 text-start">Total Price</th>
+                                <th class="p-2 text-center">Actions</th> <!-- Nueva columna para acciones -->
                             </tr>
                         </thead>
                         <tbody id="productList">
@@ -166,20 +167,30 @@
 
             function renderProductList() {
                 productList.innerHTML = '';
-                products.forEach(product => {
+                products.forEach((product, index) => { // Agregar el 'index' aquí
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                <td class="p-2">${product.name}</td>
-                <td class="p-2 flex items-center space-x-2">
-                    <button onclick="decreaseQuantity(${product.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded">-</button>
-                    <span class="text-center w-8">${product.quantity}</span>
-                    <button onclick="increaseQuantity(${product.id})" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-2 rounded">+</button>
-                </td>
-                <td class="p-2">$${product.unit_price}</td>
-                <td class="p-2">$${product.totalPrice}</td>
-            `;
+            <td class="p-2">${product.name}</td>
+            <td class="p-2 flex items-center space-x-2">
+                <button onclick="decreaseQuantity(${product.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded">-</button>
+                <span class="text-center w-8">${product.quantity}</span>
+                <button onclick="increaseQuantity(${product.id})" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-2 rounded">+</button>
+            </td>
+            <td class="p-2">$${product.unit_price}</td>
+            <td class="p-2">$${product.totalPrice}</td>
+            <td class="p-2">
+                <button onclick="removeProduct(${index})" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Eliminar</button>
+            </td>
+        `;
                     productList.appendChild(row);
                 });
+            }
+
+
+            function removeProduct(index) {
+                products.splice(index, 1); // Eliminar el producto del array
+                renderProductList(); // Volver a renderizar la lista de productos
+                updateTotalAmount(); // Actualizar el total
             }
 
             function updateTotalAmount() {

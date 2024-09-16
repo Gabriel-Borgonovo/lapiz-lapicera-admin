@@ -93,8 +93,8 @@
                         <td class="p-2">$ ${sale.total_amount}</td>
                         <td class="p-2">${new Date(sale.created_at).toLocaleDateString()}</td>
                         <td class="p-2 flex justify-center space-x-4">
-                            <a href="/sales/${sale.id}" class="text-blue-500 hover:underline">Ver detalles</a>
-                            <a href="/sales/${sale.id}/edit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded">Editar</a>
+                            <a href="/admin/sales/${sale.id}" class="text-blue-500 hover:underline">Ver detalles</a>
+                            <a href="/admin/sales/${sale.id}/edit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded">Editar</a>
                             <form action="/admin/sales/${sale.id}" method="POST" onsubmit="return confirm('Estás seguro que quieres eliminar esta venta?');">
                                 @csrf
                                 @method('DELETE')
