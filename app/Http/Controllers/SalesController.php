@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -15,12 +16,46 @@ class SalesController extends Controller
     // Mostrar la lista de ventas
     public function index()
     {
-        $sales = Sale::with('saleItems.product')
-            ->orderBy('created_at', 'desc') // Ordenar por fecha de creación en orden descendente
-            ->get();
-        return view('admin.sales.sales-index', compact('sales'));
+        // Solo devuelve la vista sin los datos
+        return view('admin.sales.sales-index');
     }
 
+
+
+    /********************************************** */
+
+
+    public function getSales(Request $request)
+{
+    $query = Sale::with('saleItems.product');
+
+    // Filtro por fecha de venta
+    if ($request->filled('sale_date')) {
+        // Convertir la fecha de la solicitud al formato 'Y-m-d' y agregar las horas de inicio y fin del día
+        $date = date('Y-m-d', strtotime($request->sale_date));
+        $startOfDay = $date . ' 00:00:00';
+        $endOfDay = $date . ' 23:59:59';
+
+        $query->whereBetween('created_at', [$startOfDay, $endOfDay]);
+    }
+
+    // Filtro por monto total
+    if ($request->filled('total_amount')) {
+        $query->where('total_amount', $request->total_amount);
+    }
+
+    $sales = $query->orderBy('created_at', 'desc')->get();
+
+    return response()->json($sales);
+}
+
+
+
+
+
+
+    /***************************** */
+    /**Editar una venta */
     public function edit($id)
     {
         $sale = Sale::findOrFail($id);
@@ -40,27 +75,8 @@ class SalesController extends Controller
         return redirect()->route('sales.index')->with('success', 'Venta actualizada correctamente.');
     }
 
-    // Eliminar una venta
-    // public function destroy($id)
-    // {
-    //     $sale = Sale::findOrFail($id);
-
-    //     // Reintegra los elementos asociados a la venta al stock
-    //     foreach ($sale->saleItems as $saleItem) {
-    //         $product = Product::find($saleItem->product_id);
-    //         if ($product) {
-    //             $product->increment('stock', $saleItem->quantity);
-    //         }
-    //     }
-
-    //     // Elimina los elementos asociados a la venta
-    //     $sale->saleItems()->delete();
-
-    //     // Elimina la venta
-    //     $sale->delete();
-
-    //     return redirect()->route('sales.index')->with('success', 'Sale deleted and stock restored successfully.');
-    // }
+    /************************************************ */
+    /** Eliminar una venta */
     public function destroy($id)
     {
         $sale = Sale::findOrFail($id);

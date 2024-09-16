@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
 
     // Mostrar la lista de ventas
     Route::get('admin/sales', [SalesController::class, 'index'])->name('sales.index');
+    Route::get('admin/sales/get-sales', [SalesController::class, 'getSales'])->name('sales.get');
     Route::get('admin/sales/create', [SalesController::class, 'create'])->name('sales-create');
     Route::get('admin/sales/{id}', [SalesController::class, 'show'])->name('sales-show');
     Route::get('admin/sales/{id}/edit', [SalesController::class, 'edit'])->name('sales-edit');
