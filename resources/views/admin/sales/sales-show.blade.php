@@ -46,8 +46,7 @@
                                             {{ __(' por pago con tarjeta y/o QR') }}
                                         </td>
                                         <td class="p-2 border-b">
-                                            $
-                                            {{ number_format($sale->saleItems->sum(fn($item) => $item->quantity * $item->unit_price) * ($sale->surcharge_percent / 100), 2) }}
+                                            ${{ number_format($sale->total_before_adjustments * ($sale->surcharge_percent / 100), 2) }}
                                         </td>
                                     </tr>
                                 @endif
@@ -60,8 +59,8 @@
                                             {{ __(' por promoción vigente') }}
                                         </td>
                                         <td class="p-2 border-b">
-                                            - $
-                                            {{ number_format($sale->saleItems->sum(fn($item) => $item->quantity * $item->unit_price) * ($sale->discount_percent / 100), 2) }}
+                                            -
+                                            ${{ number_format($sale->total_before_adjustments * ($sale->discount_percent / 100), 2) }}
                                         </td>
                                     </tr>
                                 @endif

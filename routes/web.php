@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
 
     // Rutas para generar tickets
     Route::get('admin/tickets', [TicketController::class, 'index'])->name('tickets.index');
+    Route::get('admin/get-tickets', [TicketController::class, 'getTickets'])->name('get.tickets');
     Route::get('admin/tickets/generate/{saleId}', [TicketController::class, 'generate'])->name('tickets.generate');
     Route::get('admin/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
     Route::get('admin/tickets/download/{id}', [TicketController::class, 'download'])->name('tickets.download');

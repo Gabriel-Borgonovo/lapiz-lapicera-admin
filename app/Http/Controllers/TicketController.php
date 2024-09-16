@@ -11,13 +11,42 @@ use Illuminate\Support\Facades\Storage;
 
 class TicketController extends Controller
 {
+
     public function index()
     {
-        // Obtener todos los tickets con su información relacionada
-        $tickets = Ticket::with('sale')->paginate(10); // Puedes ajustar la paginación si lo deseas
+        return view('admin.tickets.ticket-index');
+    }
 
-        // Pasar los tickets a la vista
-        return view('admin.tickets.ticket-index', compact('tickets'));
+    public function getTickets(Request $request)
+    {
+        // Obtener todos los tickets con su información relacionada
+        $query = Ticket::with('sale');
+
+        // Filtro por fecha de creación de ticket
+        if ($request->filled('created_at')) {
+            $date = date('Y-m-d', strtotime($request->created_at));
+            $query->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59']);
+        }
+
+        // Filtro por nombre del cliente
+        if ($request->filled('client_name')) {
+            $query->whereHas('sale', function ($q) use ($request) {
+                $q->where('client_name', 'like', '%' . $request->client_name . '%');
+            });
+        }
+
+        // Filtro por empresa del cliente
+        if ($request->filled('client_company')) {
+            $query->whereHas('sale', function ($q) use ($request) {
+                $q->where('client_company', 'like', '%' . $request->client_company . '%');
+            });
+        }
+
+        // Obtener los tickets filtrados o todos los tickets si no hay filtros
+        $tickets = $query->get();
+
+        // Devolver los tickets en formato JSON
+        return response()->json($tickets);
     }
 
     // Función para eliminar ticket
@@ -40,7 +69,7 @@ class TicketController extends Controller
 
 
     /************************************************************************ */
-    
+
     // Método para generar un ticket en PDF y guardarlo
     public function generate($saleId)
     {
