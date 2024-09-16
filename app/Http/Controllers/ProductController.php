@@ -52,6 +52,67 @@ class ProductController extends Controller
         ]);
     }
 
+
+
+    /*************************************************************** */
+
+    /**Manejo del stock */
+
+    // Método para mostrar la tabla de productos con stock igual o menor a 4
+    public function indexLowStock()
+    {
+        // Obtener productos con stock igual o menor a 4
+        $products = Product::where('stock', '<=', 4)->get();
+
+        // Extraer categorías únicas de los productos con bajo stock
+        $categories = $products->pluck('category')->unique()->sort();
+
+        // Pasar productos y categorías a la vista de productos con bajo stock
+        return view('admin.products.products-lowstock-index', compact('products', 'categories'));
+    }
+
+    
+    // Obtener productos con stock igual o menor a 4 en formato JSON
+    public function getProductsWithLowStock(Request $request)
+    {
+        $search = $request->input('search');
+        $category = $request->input('category');
+    
+        // Consultar solo productos con stock igual o menor a 4
+        $query = Product::where('stock', '<=', 4);
+    
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('barcode', 'LIKE', "%$search%")
+                    ->orWhere('name', 'LIKE', "%$search%");
+            });
+        }
+    
+        if ($category) {
+            $query->where('category', $category);
+        }
+    
+        // Ordenar para que los productos con stock 0 aparezcan primero
+        $query->orderByRaw('stock = 0 DESC, stock ASC');
+    
+        $products = $query->paginate(10);
+    
+        return response()->json([
+            'products' => $products->items(),
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+            ],
+        ]);
+    }
+
+
+
+    /***************************************************************** */
+
+
+
+
     public function create()
     {
         return view('admin.products.products-create');

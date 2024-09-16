@@ -51,13 +51,17 @@ Route::middleware('auth')->group(function () {
     // Ruta para la vista de productos
     Route::get('admin/products', [ProductController::class, 'index'])->name('productsIndex');
     Route::get('/api/products/json', [ProductController::class, 'getProducts'])->name('products.json');
+    Route::get('/api/products-stock', [ProductController::class, 'getProductsWithLowStock'])->name('getProductsWithStock');
 
     // Otras rutas relacionadas con productos, como crear, editar, eliminar, etc.
     Route::get('admin/products/create', [ProductController::class, 'create'])->name('products.create');
     Route::post('admin/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('admin/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::get('admin/products-stock', [ProductController::class, 'indexLowStock'])->name('productsStockIndex');
+
     Route::put('admin/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('admin/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    
 
     // Mostrar la lista de ventas
     Route::get('admin/sales', [SalesController::class, 'index'])->name('sales.index');
@@ -84,7 +88,7 @@ Route::middleware('auth')->group(function () {
     Route::get('admin/get-tickets', [TicketController::class, 'getTickets'])->name('get.tickets');
     Route::get('admin/tickets/generate/{saleId}', [TicketController::class, 'generate'])->name('tickets.generate');
     Route::get('admin/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
-    Route::get('admin/tickets/download/{id}', [TicketController::class, 'download'])->name('tickets.download');
+    Route::get('admin/tickets/{id}/download', [TicketController::class, 'download'])->name('tickets.download');
     Route::delete('admin/tickets/{id}', [TicketController::class, 'destroy'])->name('tickets.destroy');
 });
 

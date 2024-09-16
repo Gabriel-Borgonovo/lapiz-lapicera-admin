@@ -39,6 +39,10 @@
                         <x-nav-link :href="Route('tickets.index')" :active="request()->routeIs('tickets.index')">
                             {{ __('Tickets') }}
                         </x-nav-link>
+
+                        <x-nav-link :href="Route('productsStockIndex')" :active="request()->routeIs('productsStockIndex')">
+                            {{ __('Stock') }}
+                        </x-nav-link>
                     @endhasrole
                 </div>
             </div>
