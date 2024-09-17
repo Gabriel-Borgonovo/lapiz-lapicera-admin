@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -71,32 +72,32 @@ class ProductController extends Controller
         return view('admin.products.products-lowstock-index', compact('products', 'categories'));
     }
 
-    
+
     // Obtener productos con stock igual o menor a 4 en formato JSON
     public function getProductsWithLowStock(Request $request)
     {
         $search = $request->input('search');
         $category = $request->input('category');
-    
+
         // Consultar solo productos con stock igual o menor a 4
         $query = Product::where('stock', '<=', 4);
-    
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('barcode', 'LIKE', "%$search%")
                     ->orWhere('name', 'LIKE', "%$search%");
             });
         }
-    
+
         if ($category) {
             $query->where('category', $category);
         }
-    
+
         // Ordenar para que los productos con stock 0 aparezcan primero
         $query->orderByRaw('stock = 0 DESC, stock ASC');
-    
+
         $products = $query->paginate(10);
-    
+
         return response()->json([
             'products' => $products->items(),
             'pagination' => [
@@ -106,12 +107,25 @@ class ProductController extends Controller
         ]);
     }
 
+    public function downloadPDF()
+    {
+        // Obtener los productos con stock 0 o al límite (asumiendo límite de 4 unidades)
+        $productosSinStock = Product::where('stock', 0)->get();
+        $productosAlLimite = Product::where('stock', '<=', 4)->where('stock', '>', 0)->get();
+
+        // Pasar los productos a la vista del PDF
+        $pdf = Pdf::loadView('admin.products.productos-a-reponer-pdf', compact('productosSinStock', 'productosAlLimite'));
+
+        // Descargar el PDF
+        return $pdf->download('lista_productos_bajo_stock.pdf');
+    }
+
 
 
     /***************************************************************** */
 
 
-
+    //Crear y guardar productos
 
     public function create()
     {
@@ -166,6 +180,14 @@ class ProductController extends Controller
         // Redirigir a la lista de productos con un mensaje de éxito
         return redirect()->route('productsIndex')->with('success', 'Product created successfully.');
     }
+
+
+
+    //**************************************************** */
+
+
+
+    // Editar y actualizar productos
 
     public function edit($id)
     {
@@ -243,6 +265,14 @@ class ProductController extends Controller
         return redirect()->route('productsIndex')->with('success', 'Product updated successfully.');
     }
 
+
+
+
+    /*************************************************************** */
+
+
+    //Eliminar el producto
+
     public function destroy($id)
     {
         // Obtener el producto por su ID
@@ -271,4 +301,7 @@ class ProductController extends Controller
         // Redirigir a la lista de productos con un mensaje de éxito
         return redirect()->route('productsIndex')->with('success', 'Product deleted successfully.');
     }
+
+
+    //Fin del controlador
 }

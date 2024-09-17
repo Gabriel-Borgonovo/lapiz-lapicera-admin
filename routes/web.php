@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::post('admin/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('admin/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
     Route::get('admin/products-stock', [ProductController::class, 'indexLowStock'])->name('productsStockIndex');
+    Route::get('admin/products/pdf', [ProductController::class, 'downloadPDF'])->name('productos.pdf');
 
     Route::put('admin/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('admin/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');

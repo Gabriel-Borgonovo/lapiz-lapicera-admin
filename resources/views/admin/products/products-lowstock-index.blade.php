@@ -11,6 +11,9 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100 overflow-scroll">
                     <div class="flex min-600 justify-between mb-4 items-center shadow-lg p-2 rounded">
                         <h3 class="text-lg font-semibold">{{ __('Productos con Bajo Stock') }}</h3>
+                        <a href="{{ route('productos.pdf') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Descargar Lista PDF
+                        </a>
                     </div>
 
                     <!-- Formulario de búsqueda y filtro -->
