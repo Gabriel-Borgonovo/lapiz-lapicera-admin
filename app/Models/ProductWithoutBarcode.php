@@ -9,5 +9,5 @@ class ProductWithoutBarcode extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'category', 'barcode'];
+    protected $fillable = ['name', 'category', 'number', 'barcode'];
 }

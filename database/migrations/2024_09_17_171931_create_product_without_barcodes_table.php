@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name'); // Nombre del producto
             $table->string('category')->nullable(); // Categoría del producto
+            $table->string('number')->nullable(); // Campo para almacenar el número generado
             $table->string('barcode')->nullable()->unique(); // Código de barras generado (puede ser nulo inicialmente)
             $table->timestamps();
         });

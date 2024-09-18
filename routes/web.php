@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductWithoutBarcodeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesController;
@@ -58,11 +59,11 @@ Route::middleware('auth')->group(function () {
     Route::post('admin/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('admin/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
     Route::get('admin/products-stock', [ProductController::class, 'indexLowStock'])->name('productsStockIndex');
-    Route::get('admin/products/pdf', [ProductController::class, 'downloadPDF'])->name('productos.pdf');
+    Route::get('admin/products-stock/pdf', [ProductController::class, 'downloadPDF'])->name('productos.pdf');
 
     Route::put('admin/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('admin/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-    
+
 
     // Mostrar la lista de ventas
     Route::get('admin/sales', [SalesController::class, 'index'])->name('sales.index');
@@ -91,6 +92,22 @@ Route::middleware('auth')->group(function () {
     Route::get('admin/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
     Route::get('admin/tickets/{id}/download', [TicketController::class, 'download'])->name('tickets.download');
     Route::delete('admin/tickets/{id}', [TicketController::class, 'destroy'])->name('tickets.destroy');
+
+    //rutas para generar códigos de barra
+    Route::get('admin/products-without-barcode', [ProductWithoutBarcodeController::class, 'index'])
+        ->name('products_without_barcode.index'); // Mostrar listado de productos
+
+    Route::get('admin/products-without-barcode/create', [ProductWithoutBarcodeController::class, 'create'])
+        ->name('products_without_barcode.create'); // Mostrar formulario de creación
+
+    Route::post('admin/products-without-barcode', [ProductWithoutBarcodeController::class, 'store'])
+        ->name('products_without_barcode.store'); // Guardar un nuevo producto
+
+    Route::get('/products_without_barcode/{id}/generate_barcode', [ProductWithoutBarcodeController::class, 'generateBarcode'])
+        ->name('products_without_barcode.generateBarcode');
+
+    
+    Route::get('admin/products/pdf', [ProductWithoutBarcodeController::class, 'generatePdf'])->name('products_without_barcode.pdf');
 });
 
 require __DIR__ . '/auth.php';

@@ -43,6 +43,11 @@
                         <x-nav-link :href="Route('productsStockIndex')" :active="request()->routeIs('productsStockIndex')">
                             {{ __('Stock') }}
                         </x-nav-link>
+
+                        <x-nav-link :href="Route('products_without_barcode.index')" :active="request()->routeIs('products_without_barcode.index')">
+                            {{ __('Generador') }}
+                        </x-nav-link>
+
                     @endhasrole
                 </div>
             </div>
