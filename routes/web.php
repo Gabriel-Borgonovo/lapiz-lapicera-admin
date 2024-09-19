@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CashboxController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductWithoutBarcodeController;
@@ -94,20 +95,42 @@ Route::middleware('auth')->group(function () {
     Route::delete('admin/tickets/{id}', [TicketController::class, 'destroy'])->name('tickets.destroy');
 
     //rutas para generar códigos de barra
+    // Mostrar listado de productos sin código de barras
     Route::get('admin/products-without-barcode', [ProductWithoutBarcodeController::class, 'index'])
-        ->name('products_without_barcode.index'); // Mostrar listado de productos
+        ->name('products_without_barcode.index');
 
+    // Mostrar formulario para crear un nuevo producto
     Route::get('admin/products-without-barcode/create', [ProductWithoutBarcodeController::class, 'create'])
-        ->name('products_without_barcode.create'); // Mostrar formulario de creación
+        ->name('products_without_barcode.create');
 
+    // Guardar un nuevo producto en la base de datos
     Route::post('admin/products-without-barcode', [ProductWithoutBarcodeController::class, 'store'])
-        ->name('products_without_barcode.store'); // Guardar un nuevo producto
+        ->name('products_without_barcode.store');
 
-    Route::get('/products_without_barcode/{id}/generate_barcode', [ProductWithoutBarcodeController::class, 'generateBarcode'])
+    // Mostrar formulario para editar un producto existente
+    Route::get('admin/products-without-barcode/{id}/edit', [ProductWithoutBarcodeController::class, 'edit'])
+        ->name('products_without_barcode.edit');
+
+    // Actualizar un producto existente en la base de datos
+    Route::put('admin/products-without-barcode/{id}', [ProductWithoutBarcodeController::class, 'update'])
+        ->name('products_without_barcode.update');
+
+    // Eliminar un producto
+    Route::delete('admin/products-without-barcode/{id}', [ProductWithoutBarcodeController::class, 'destroy'])
+        ->name('products_without_barcode.destroy');
+
+    // Generar código de barras para un producto específico
+    Route::get('products_without_barcode/{id}/generate_barcode', [ProductWithoutBarcodeController::class, 'generateBarcode'])
         ->name('products_without_barcode.generateBarcode');
 
-    
-    Route::get('admin/products/pdf', [ProductWithoutBarcodeController::class, 'generatePdf'])->name('products_without_barcode.pdf');
+    // Generar un PDF con los productos sin código de barras
+    Route::get('admin/products/pdf', [ProductWithoutBarcodeController::class, 'generatePdf'])
+        ->name('products_without_barcode.pdf');
+
+
+    /****************************************** */
+    // Ruta para la caja
+    Route::get('admin/cashbox', [CashboxController::class, 'index'])->name('cashbox-index');
 });
 
 require __DIR__ . '/auth.php';

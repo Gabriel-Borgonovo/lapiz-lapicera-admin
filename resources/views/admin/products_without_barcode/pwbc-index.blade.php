@@ -33,9 +33,8 @@
                                 <th class="p-2 text-start">{{ __('ID') }}</th>
                                 <th class="p-2 text-start">{{ __('Nombre') }}</th>
                                 <th class="p-2 text-start">{{ __('Categoría') }}</th>
-                                <th class="p-2 text-start">{{ __('Número') }}</th>
-                                <th class="p-2 text-start">{{ __('Código de barras') }}</th>
-                                <th class="p-2 text-center">{{ __('Acciones') }}</th>
+                                <th class="p-2 text-start">{{ __('Código') }}</th>
+                                <th class="p-2 text-start">{{ __('Acciones') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -46,10 +45,19 @@
                                     <td class="p-2">{{ $product->category }}</td>
                                     <td class="p-2">{{ $product->number }}</td>
                                     <td class="p-2">
-                                        {!! $product->barcode !!}
-                                    </td>
-                                    <td class="p-2 flex justify-center space-x-4">
-                                        <!-- Agregar acciones como editar, eliminar, etc. -->
+                                        <!-- Botones de Editar y Eliminar -->
+                                        <a href="{{ route('products_without_barcode.edit', $product->id) }}"
+                                           class="inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">
+                                            {{ __('Editar') }}
+                                        </a>
+                                        <form action="{{ route('products_without_barcode.destroy', $product->id) }}" method="POST" style="display:inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded"
+                                                    onclick="return confirm('{{ __('¿Estás seguro de que quieres eliminar este producto?') }}')">
+                                                {{ __('Eliminar') }}
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             @empty
@@ -67,3 +75,4 @@
         </div>
     </div>
 </x-app-layout>
+
