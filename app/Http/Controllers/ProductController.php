@@ -42,6 +42,9 @@ class ProductController extends Controller
             $query->where('category', $category);
         }
 
+         // Ordenar por created_at de manera descendente
+        $query->orderBy('created_at', 'desc');
+
         $products = $query->paginate(10);
 
         return response()->json([
@@ -137,7 +140,6 @@ class ProductController extends Controller
     {
         // Validación de datos
         $validated = $request->validate([
-            'order' => 'required|unique:products',
             'barcode' => 'required|unique:products',
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
@@ -202,7 +204,6 @@ class ProductController extends Controller
     {
         // Validación de datos
         $validated = $request->validate([
-            'order' => 'required|unique:products,order,' . $id,
             'barcode' => 'required|unique:products,barcode,' . $id,
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',

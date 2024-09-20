@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('description'); // Descripción del egreso
             $table->decimal('amount', 10, 2); // Monto del egreso
-            $table->enum('type', ['compra de productos', 'insumos', 'impuestos', 'proveedores', 'servicios', 'comida', 'otros']); // Tipo de egreso
+            $table->enum('type', ['compra de productos', 'insumos', 'impuestos', 'proveedores', 'servicios', 'comida', 'transporte', 'otros']); // Tipo de egreso
             $table->timestamps();
         });
     }

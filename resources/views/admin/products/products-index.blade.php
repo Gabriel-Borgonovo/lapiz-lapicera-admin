@@ -28,7 +28,7 @@
                             </button>
                             <select name="category" id="category" class="form-select block w-full mt-1">
                                 <option value="">Todas las categorías</option>
-                                @foreach($categories as $category)
+                                @foreach ($categories as $category)
                                     <option value="{{ $category }}">{{ $category }}</option>
                                 @endforeach
                             </select>
@@ -82,34 +82,45 @@
                     }
                     const data = await response.json();
 
+                    // Verificar los datos obtenidos
+                    console.log(data); // Esto te ayudará a ver cómo viene la respuesta JSON
+
                     // Limpiar la tabla y la paginación
                     productsTable.innerHTML = '';
                     paginationDiv.innerHTML = '';
+
+                    // Obtener los datos de paginación de manera segura
+                    const pagination = data.pagination || {};
+                    const currentPage = pagination.current_page || 1;
+                    const perPage = pagination.per_page || 10; // Valor predeterminado en caso de que no exista
+                    const total = pagination.total || 0;
+
+                    // Calcular el índice inicial en función de la página actual
+                    let index = (currentPage - 1) * perPage + 1;
 
                     // Agregar filas a la tabla
                     data.products.forEach(product => {
                         const row = productsTable.insertRow();
                         row.innerHTML = `
-                    <td class="p-2">${product.order}</td>
-                    <td class="p-2"><img src="${product.image}" alt="imagen producto" class="w-14" /></td>
-                    <td class="p-2">${product.barcode}</td>
-                    <td class="p-2 font-black text-blue-900">${product.name}</td>
-                    <td class="p-2">${product.category}</td>
-                    <td class="p-2">${product.sale_price}</td>
-                    <td class="p-2">${product.stock}</td>
-                    <td class="p-2 text-center">
-                        <a href="/admin/products/${product.id}/edit" class="inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">Editar</a>
-                        <form action="/admin/products/${product.id}" method="POST" class="inline-block" onsubmit="return confirm('¿Está seguro de eliminar este producto?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">Eliminar</button>
-                        </form>
-                    </td>
-                `;
+                <td class="p-2">${index++}</td> <!-- Mostrar el índice aquí -->
+                <td class="p-2"><img src="${product.image}" alt="imagen producto" class="w-14" /></td>
+                <td class="p-2">${product.barcode}</td>
+                <td class="p-2 font-black text-blue-900">${product.name}</td>
+                <td class="p-2">${product.category}</td>
+                <td class="p-2">${product.sale_price}</td>
+                <td class="p-2">${product.stock}</td>
+                <td class="p-2 text-center">
+                    <a href="/admin/products/${product.id}/edit" class="inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">Editar</a>
+                    <form action="/admin/products/${product.id}" method="POST" class="inline-block" onsubmit="return confirm('¿Está seguro de eliminar este producto?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">Eliminar</button>
+                    </form>
+                </td>
+            `;
                     });
 
-                    // Agregar enlaces de paginación
-                    const pagination = data.pagination;
+                    // Agregar enlaces de paginación si es necesario
                     if (pagination.last_page > 1) {
                         for (let i = 1; i <= pagination.last_page; i++) {
                             const link = document.createElement('a');
@@ -126,12 +137,14 @@
                 }
             }
 
+
             // Manejar el envío del formulario al presionar Enter
             searchInput.addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
                     fetchProducts(
-                        `/api/products/json?search=${searchInput.value}&category=${categoryInput.value}`);
+                        `/api/products/json?search=${searchInput.value}&category=${categoryInput.value}&page=1`
+                        );
                 }
             });
 
@@ -141,14 +154,16 @@
                 clearTimeout(timeout);
                 timeout = setTimeout(() => {
                     fetchProducts(
-                        `/api/products/json?search=${searchInput.value}&category=${categoryInput.value}`
-                        );
+                        `/api/products/json?search=${searchInput.value}&category=${categoryInput.value}&page=1`
+                    );
                 }, 300); // 300ms de debounce
             });
 
-            // Manejar el envío del formulario cuando se cambia la categoría
+            // Manejar el cambio de categoría
             categoryInput.addEventListener('change', function() {
-                fetchProducts(`/api/products/json?search=${searchInput.value}&category=${categoryInput.value}`);
+                fetchProducts(
+                    `/api/products/json?search=${searchInput.value}&category=${categoryInput.value}&page=1`
+                    );
             });
 
             // Manejar el clic en el botón de limpiar
@@ -158,7 +173,8 @@
             });
 
             // Cargar los productos inicialmente
-            fetchProducts('/api/products/json');
+            fetchProducts('/api/products/json?page=1');
         });
     </script>
+
 </x-app-layout>

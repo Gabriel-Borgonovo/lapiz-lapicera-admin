@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CashboxController;
+use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductWithoutBarcodeController;
@@ -131,6 +132,18 @@ Route::middleware('auth')->group(function () {
     /****************************************** */
     // Ruta para la caja
     Route::get('admin/cashbox', [CashboxController::class, 'index'])->name('cashbox-index');
+
+
+    /******************************************** */
+    //Rutas para los gastos
+    Route::get('/api/expenses', [ExpensesController::class, 'getExpenses'])->name('expenses.getExpenses');
+    Route::get('admin/expenses', [ExpensesController::class, 'index'])->name('admin.expenses.index');        // Listar los egresos
+    Route::get('admin/expenses/create', [ExpensesController::class, 'create'])->name('admin.expenses.create'); // Mostrar formulario para crear un egreso
+    Route::post('admin/expenses', [ExpensesController::class, 'store'])->name('admin.expenses.store');         // Guardar un nuevo egreso
+    Route::get('admin/expenses/{expense}', [ExpensesController::class, 'show'])->name('admin.expenses.show');   // Mostrar un egreso específico
+    Route::get('admin/expenses/{expense}/edit', [ExpensesController::class, 'edit'])->name('admin.expenses.edit'); // Mostrar formulario para editar un egreso
+    Route::put('admin/expenses/{expense}', [ExpensesController::class, 'update'])->name('admin.expenses.update');  // Actualizar un egreso
+    Route::delete('admin/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('admin.expenses.destroy'); // Eliminar un egreso
 });
 
 require __DIR__ . '/auth.php';

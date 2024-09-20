@@ -14,16 +14,7 @@
                         @csrf
                         @method('PUT')
 
-                        <div class="mb-4">
-                            <label for="order"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-400">Número de orden del producto</label>
-                            <input type="text" id="order" name="order"
-                                value="{{ old('order', $product->order) }}"
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm @error('order') border-red-500 @enderror">
-                            @error('order')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                
 
                         <div class="mb-4">
                             <label for="barcode"

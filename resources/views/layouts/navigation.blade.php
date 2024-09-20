@@ -52,6 +52,10 @@
                             {{ __('Caja') }}
                         </x-nav-link>
 
+                        <x-nav-link :href="Route('admin.expenses.index')" :active="request()->routeIs('admin.expenses.index')">
+                            {{ __('Gastos') }}
+                        </x-nav-link>
+
                     @endhasrole
                 </div>
             </div>
