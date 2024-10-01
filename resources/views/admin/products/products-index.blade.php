@@ -57,8 +57,10 @@
                     </table>
 
                     <!-- Paginación -->
-                    <div id="pagination" class="mt-4">
-                        <!-- Los enlaces de paginación se cargarán aquí mediante JavaScript -->
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <div id="product-count" class="text-gray-700 text-sm"></div>
+                        <div id="pagination" class="flex space-x-2"></div>
                     </div>
                 </div>
             </div>
@@ -75,67 +77,111 @@
             const clearButton = document.getElementById('clear-search'); // Nuevo botón de limpiar
 
             async function fetchProducts(url) {
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    const data = await response.json();
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
 
-                    // Verificar los datos obtenidos
-                    console.log(data); // Esto te ayudará a ver cómo viene la respuesta JSON
+            // Limpiar la tabla y la paginación
+            productsTable.innerHTML = '';
+            paginationDiv.innerHTML = '';
 
-                    // Limpiar la tabla y la paginación
-                    productsTable.innerHTML = '';
-                    paginationDiv.innerHTML = '';
+            // Actualizar el contador de productos
+            const productCount = document.getElementById('product-count');
+            productCount.innerHTML = `Mostrando ${data.from} - ${data.to} de ${data.total} productos`;
 
-                    // Obtener los datos de paginación de manera segura
-                    const pagination = data.pagination || {};
-                    const currentPage = pagination.current_page || 1;
-                    const perPage = pagination.per_page || 10; // Valor predeterminado en caso de que no exista
-                    const total = pagination.total || 0;
+            // Calcular el índice inicial en función de la página actual
+            let index = (data.from || 0);
 
-                    // Calcular el índice inicial en función de la página actual
-                    let index = (currentPage - 1) * perPage + 1;
-
-                    // Agregar filas a la tabla
-                    data.products.forEach(product => {
-                        const row = productsTable.insertRow();
-                        row.innerHTML = `
-                <td class="p-2">${index++}</td> <!-- Mostrar el índice aquí -->
-                <td class="p-2"><img src="${product.image}" alt="imagen producto" class="w-14" /></td>
+            // Agregar filas a la tabla
+            data.data.forEach(product => {
+                const row = productsTable.insertRow();
+                row.innerHTML = `
+                <td class="p-2">${index++}</td>
+                <td class="p-2"><img src="${product.image}" alt="imagen producto" class="w-14 rounded-md shadow-sm" /></td>
                 <td class="p-2">${product.barcode}</td>
-                <td class="p-2 font-black text-blue-900">${product.name}</td>
-                <td class="p-2">${product.category}</td>
-                <td class="p-2">${product.sale_price}</td>
+                <td class="p-2 font-semibold text-blue-900 w-44">${product.name}</td>
+                <td class="p-2 text-gray-600">${product.category}</td>
+                <td class="p-2 text-green-600 font-semibold">$ ${product.sale_price}</td>
                 <td class="p-2">${product.stock}</td>
                 <td class="p-2 text-center">
-                    <a href="/admin/products/${product.id}/edit" class="inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">Editar</a>
-                    <form action="/admin/products/${product.id}" method="POST" class="inline-block" onsubmit="return confirm('¿Está seguro de eliminar este producto?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">Eliminar</button>
-                    </form>
+                    <div class="flex justify-center items-center flex-nowrap gap-2">
+                        <a href="/admin/products/${product.id}/edit" class="inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">Editar</a>
+                        <form action="/admin/products/${product.id}" method="POST" class="inline-block" onsubmit="return confirm('¿Está seguro de eliminar este producto?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded shadow">Eliminar</button>
+                        </form>
+                    </div>
                 </td>
-            `;
-                    });
+                `;
+            });
 
-                    // Agregar enlaces de paginación si es necesario
-                    if (pagination.last_page > 1) {
-                        for (let i = 1; i <= pagination.last_page; i++) {
-                            const link = document.createElement('a');
-                            link.href =
-                            `?page=${i}&search=${searchInput.value}&category=${categoryInput.value}`;
-                            link.className =
-                                'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2';
-                            link.innerText = i;
-                            paginationDiv.appendChild(link);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error fetching products:', error);
+            // Crear enlaces de paginación
+            if (data.total > data.per_page) {
+                const totalPages = data.last_page;
+                const currentPage = data.current_page;
+                const maxPagesToShow = 3;
+                let startPage = Math.max(currentPage - Math.floor(maxPagesToShow / 2), 1);
+                let endPage = Math.min(startPage + maxPagesToShow - 1, totalPages);
+
+                if (endPage - startPage < maxPagesToShow - 1) {
+                    startPage = Math.max(endPage - maxPagesToShow + 1, 1);
+                }
+
+                // Botón "Principio"
+                if (currentPage > 1) {
+                    const firstLink = document.createElement('a');
+                    firstLink.href = '#';
+                    firstLink.dataset.url = data.path +
+                        `?page=1&search=${searchInput.value}&category=${categoryInput.value}`;
+                    firstLink.className = 'bg-gray-300 hover:bg-blue-700 text-blue-700 hover:text-white font-bold py-2 px-4 rounded shadow';
+                    firstLink.innerText = 'Principio';
+                    firstLink.addEventListener('click', handlePaginationClick);
+                    paginationDiv.appendChild(firstLink);
+                }
+
+                // Páginas numeradas
+                for (let i = startPage; i <= endPage; i++) {
+                    const link = document.createElement('a');
+                    link.href = '#';
+                    link.dataset.url = data.path +
+                        `?page=${i}&search=${searchInput.value}&category=${categoryInput.value}`;
+                    link.className =
+                        `hover:bg-blue-700 hover:text-white font-bold py-2 px-4 rounded shadow ${i === currentPage ? 'bg-blue-700 text-white' : 'bg-gray-300 text-blue-700'}`;
+                    link.innerText = i;
+                    link.addEventListener('click', handlePaginationClick);
+                    paginationDiv.appendChild(link);
+                }
+
+                // Botón "Final"
+                if (currentPage < totalPages) {
+                    const lastLink = document.createElement('a');
+                    lastLink.href = '#';
+                    lastLink.dataset.url = data.path +
+                        `?page=${totalPages}&search=${searchInput.value}&category=${categoryInput.value}`;
+                    lastLink.className = 'bg-gray-300 hover:bg-blue-700 text-blue-700 hover:text-white font-bold py-2 px-4 rounded shadow';
+                    lastLink.innerText = 'Final';
+                    lastLink.addEventListener('click', handlePaginationClick);
+                    paginationDiv.appendChild(lastLink);
                 }
             }
+
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        }
+    }
+
+    function handlePaginationClick(event) {
+        event.preventDefault();
+        const url = event.target.dataset.url;
+        fetchProducts(url); // Llama nuevamente a la función fetchProducts con la nueva URL
+    }
+
+
+
 
 
             // Manejar el envío del formulario al presionar Enter
@@ -144,7 +190,7 @@
                     event.preventDefault();
                     fetchProducts(
                         `/api/products/json?search=${searchInput.value}&category=${categoryInput.value}&page=1`
-                        );
+                    );
                 }
             });
 
@@ -163,7 +209,7 @@
             categoryInput.addEventListener('change', function() {
                 fetchProducts(
                     `/api/products/json?search=${searchInput.value}&category=${categoryInput.value}&page=1`
-                    );
+                );
             });
 
             // Manejar el clic en el botón de limpiar

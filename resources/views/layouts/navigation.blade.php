@@ -31,13 +31,22 @@
 
                     @hasrole('Jefe')
                         <x-nav-link :href="Route('productsIndex')" :active="request()->routeIs('productsIndex')">
-                            {{ __('Products') }}
+                            {{ __('Productos') }}
                         </x-nav-link>
                         <x-nav-link :href="Route('sales.index')" :active="request()->routeIs('sales.index')">
                             {{ __('Ventas') }}
                         </x-nav-link>
+
+                        <x-nav-link :href="Route('admin.expenses.index')" :active="request()->routeIs('admin.expenses.index')">
+                            {{ __('Egresos') }}
+                        </x-nav-link>
+
                         <x-nav-link :href="Route('tickets.index')" :active="request()->routeIs('tickets.index')">
                             {{ __('Tickets') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="Route('cashbox-index')" :active="request()->routeIs('cashbox-index')">
+                            {{ __('Caja') }}
                         </x-nav-link>
 
                         <x-nav-link :href="Route('productsStockIndex')" :active="request()->routeIs('productsStockIndex')">
@@ -47,15 +56,7 @@
                         <x-nav-link :href="Route('products_without_barcode.index')" :active="request()->routeIs('products_without_barcode.index')">
                             {{ __('Generador') }}
                         </x-nav-link>
-
-                        <x-nav-link :href="Route('cashbox-index')" :active="request()->routeIs('cashbox-index')">
-                            {{ __('Caja') }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="Route('admin.expenses.index')" :active="request()->routeIs('admin.expenses.index')">
-                            {{ __('Gastos') }}
-                        </x-nav-link>
-
+                        
                     @endhasrole
                 </div>
             </div>

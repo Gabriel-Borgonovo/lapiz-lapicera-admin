@@ -28,33 +28,28 @@ class ProductController extends Controller
     {
         $search = $request->input('search');
         $category = $request->input('category');
-
+    
         $query = Product::query();
-
+    
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('barcode', 'LIKE', "%$search%") //'name', 'LIKE', "%$search%"
-                    ->orWhere('name', 'LIKE', "%$search%"); //'barcode', 'LIKE', "%$search%"
+                $q->where('barcode', 'LIKE', "%$search%")
+                    ->orWhere('name', 'LIKE', "%$search%");
             });
         }
-
+    
         if ($category) {
             $query->where('category', $category);
         }
-
-         // Ordenar por created_at de manera descendente
+    
+        // Ordenar por created_at de manera descendente
         $query->orderBy('created_at', 'desc');
-
-        $products = $query->paginate(10);
-
-        return response()->json([
-            'products' => $products->items(),
-            'pagination' => [
-                'current_page' => $products->currentPage(),
-                'last_page' => $products->lastPage(),
-            ],
-        ]);
+    
+        $products = $query->paginate(10); // 10 productos por página
+    
+        return response()->json($products); // Devuelve toda la estructura de la paginación
     }
+    
 
 
 

@@ -19,11 +19,11 @@
                     <table class="w-full bg-white mt-4">
                         <thead>
                             <tr>
-                                <th class="p-2 text-start">Product Name</th>
-                                <th class="p-2 text-start">Quantity</th>
-                                <th class="p-2 text-start">Unit Price</th>
-                                <th class="p-2 text-start">Total Price</th>
-                                <th class="p-2 text-center">Actions</th> <!-- Nueva columna para acciones -->
+                                <th class="p-2 text-start">Producto</th>
+                                <th class="p-2 text-start">Cantidad</th>
+                                <th class="p-2 text-start">Precio unitario</th>
+                                <th class="p-2 text-start">Total</th>
+                                <th class="p-2 text-center">Acciones</th> <!-- Nueva columna para acciones -->
                             </tr>
                         </thead>
                         <tbody id="productList">
@@ -37,27 +37,27 @@
 
                     <!-- Formulario para aplicar descuento y recargo -->
                     <div class="mt-6">
-                        <h4 class="text-lg font-semibold mb-2">Adjustments</h4>
+                        <h4 class="text-lg font-semibold mb-2">Ajustes</h4>
                         <div class="flex space-x-4">
                             <div class="flex flex-col">
-                                <label for="discount" class="font-semibold">Discount (%):</label>
+                                <label for="discount" class="font-semibold">Descuento (%):</label>
                                 <input type="number" id="discount" class="border p-2 rounded" step="0.01"
                                     min="0" />
                             </div>
                             <div class="flex flex-col">
-                                <label for="surcharge" class="font-semibold">Surcharge (%):</label>
+                                <label for="surcharge" class="font-semibold">Recargo (%):</label>
                                 <input type="number" id="surcharge" class="border p-2 rounded" step="0.01"
                                     min="0" />
                             </div>
                         </div>
                         <button id="applyAdjustments"
                             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">
-                            {{ __('Apply Adjustments') }}
+                            {{ __('Aplicar Cambios') }}
                         </button>
 
                         <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4"
                             onclick="finalizeSale()">
-                            {{ __('Finalize Sale') }}
+                            {{ __('Finalizar venta') }}
                         </button>
 
                         <!-- Campos ocultos para pasar descuentos y recargos al backend -->
