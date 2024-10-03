@@ -40,7 +40,7 @@
                         <tbody>
                             @forelse ($products as $product)
                                 <tr>
-                                    <td class="p-2">{{ $product->id }}</td>
+                                    <td class="p-2">{{ $loop->iteration }}</td>
                                     <td class="p-2">{{ $product->name }}</td>
                                     <td class="p-2">{{ $product->category }}</td>
                                     <td class="p-2">{{ $product->number }}</td>
