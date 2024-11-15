@@ -17,7 +17,7 @@
                     </div>
 
                     <!-- Formulario de búsqueda y filtro -->
-                    <form id="filter-form" class="mb-4" onsubmit="return false;"> <!-- Cambiado a prevent default -->
+                    <form id="filter-form" class="mb-4" onsubmit="return false;">
                         <div class="flex items-center space-x-4">
                             <input type="text" name="search" id="search" class="form-input block w-full mt-1"
                                 placeholder="Buscar por nombre o código de barras">
@@ -46,7 +46,8 @@
                     </table>
 
                     <!-- Paginación -->
-                    <div id="pagination" class="mt-4">
+                    <div id="pagination-info" class="text-gray-700 mb-2"></div>
+                    <div id="pagination" class="mt-4 flex justify-center space-x-2">
                         <!-- Los enlaces de paginación se cargarán aquí mediante JavaScript -->
                     </div>
                 </div>
@@ -60,29 +61,22 @@
             const form = document.getElementById('filter-form');
             const tableBody = document.querySelector('#products-table tbody');
             const paginationDiv = document.getElementById('pagination');
+            const paginationInfo = document.getElementById('pagination-info');
             const clearSearch = document.getElementById('clear-search');
             const searchInput = document.getElementById('search');
-            let typingTimer; // Timer para controlar el retraso
+            const itemsPerPage = 10;
+            let typingTimer;
 
             async function loadProducts(page = 1) {
-                const search = searchInput.value.trim(); // Obtener valor directamente del campo de búsqueda
-
-                // console.log('Valor de búsqueda:', search); // Depuración
-                // console.log('URL de la solicitud:',
-                //     `{{ route('getProductsWithStock') }}?page=${page}&search=${encodeURIComponent(search)}`
-                // ); // URL de solicitud para verificar
-
+                const search = searchInput.value.trim();
                 try {
-                    const response = await fetch(
-                        `{{ route('getProductsWithStock') }}?page=${page}&search=${encodeURIComponent(search)}`
-                    );
+                    const response = await fetch(`{{ route('getProductsWithStock') }}?page=${page}&search=${encodeURIComponent(search)}`);
                     const data = await response.json();
 
-                    // Limpiar la tabla
                     tableBody.innerHTML = '';
-
-                    // Renderizar productos en la tabla
                     data.products.forEach((product, index) => {
+                        const orderNumber = (page - 1) * itemsPerPage + (index + 1);
+
                         const stockStatus = product.stock === 0
                             ? '<span class="bg-red-500 text-white font-bold px-2 py-1 rounded">Sin Stock</span>'
                             : (product.stock <= 4
@@ -91,7 +85,7 @@
 
                         tableBody.innerHTML += `
                             <tr>
-                                <td class="p-2 border-2">${index + 1}</td>
+                                <td class="p-2 border-2">${orderNumber}</td>
                                 <td class="p-2 border-2">
                                     <img src="${product.image}" alt="${product.name}" class="w-16 h-16 object-cover">
                                 </td>
@@ -103,52 +97,85 @@
                         `;
                     });
 
-                    // Renderizar paginación
+                     // Mostrar el rango actual de productos y el total
+        const totalProducts = data.pagination.total;
+        const startProduct = (page - 1) * itemsPerPage + 1;
+        const endProduct = Math.min(page * itemsPerPage, totalProducts);
+
+        paginationInfo.textContent = `Mostrando productos ${startProduct} a ${endProduct} de ${totalProducts} en total`;
+
+                    // Configuración de la paginación
                     paginationDiv.innerHTML = '';
                     if (data.pagination.last_page > 1) {
-                        for (let i = 1; i <= data.pagination.last_page; i++) {
-                            paginationDiv.innerHTML += `
-                                <button class="pagination-link ${i === data.pagination.current_page ? 'font-bold' : ''}" data-page="${i}">
+                        const currentPage = data.pagination.current_page;
+                        const lastPage = data.pagination.last_page;
+                        const paginationLinks = [];
+
+                        // Botón "Primero"
+                        if (currentPage > 1) {
+                            paginationLinks.push(`
+                                <button class="pagination-button bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-l" data-page="1">
+                                    Primero
+                                </button>
+                            `);
+                        }
+
+                        // Números de página, máximo 3 visibles
+                        let startPage = Math.max(currentPage - 1, 1);
+                        let endPage = Math.min(currentPage + 1, lastPage);
+
+                        if (currentPage === 1) {
+                            endPage = Math.min(3, lastPage);
+                        } else if (currentPage === lastPage) {
+                            startPage = Math.max(lastPage - 2, 1);
+                        }
+
+                        for (let i = startPage; i <= endPage; i++) {
+                            paginationLinks.push(`
+                                <button class="pagination-button ${i === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-800'} font-semibold py-2 px-4" data-page="${i}">
                                     ${i}
                                 </button>
-                            `;
+                            `);
                         }
+
+                        // Botón "Último"
+                        if (currentPage < lastPage) {
+                            paginationLinks.push(`
+                                <button class="pagination-button bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-r" data-page="${lastPage}">
+                                    Último
+                                </button>
+                            `);
+                        }
+
+                        paginationDiv.innerHTML = paginationLinks.join('');
                     }
                 } catch (error) {
                     console.error('Error al cargar productos:', error);
                 }
             }
 
-            // Limpiar el campo de búsqueda
             clearSearch.addEventListener('click', function() {
                 searchInput.value = '';
                 loadProducts();
             });
 
-            // Cambiar de página en la paginación
             paginationDiv.addEventListener('click', function(e) {
-                if (e.target.matches('.pagination-link')) {
+                if (e.target.matches('.pagination-button')) {
                     const page = e.target.getAttribute('data-page');
                     loadProducts(page);
                 }
             });
 
-            // Filtrar productos automáticamente mientras se escribe
             searchInput.addEventListener('input', function() {
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(() => {
                     loadProducts();
-                }, 500); // 500ms de retraso para evitar demasiadas solicitudes
+                }, 500);
             });
 
-            // Manejar el evento 'focusin' para asegurar que el campo de búsqueda no pierda el foco
-            searchInput.addEventListener('focusin', function() {
-                searchInput.focus(); // Mantener el foco en el campo de búsqueda
-            });
-
-            // Cargar los productos al inicio
             loadProducts();
         });
     </script>
-
 </x-app-layout>
+
+

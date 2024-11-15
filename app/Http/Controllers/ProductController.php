@@ -28,28 +28,28 @@ class ProductController extends Controller
     {
         $search = $request->input('search');
         $category = $request->input('category');
-    
+
         $query = Product::query();
-    
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('barcode', 'LIKE', "%$search%")
                     ->orWhere('name', 'LIKE', "%$search%");
             });
         }
-    
+
         if ($category) {
             $query->where('category', $category);
         }
-    
+
         // Ordenar por created_at de manera descendente
         $query->orderBy('created_at', 'desc');
-    
+
         $products = $query->paginate(10); // 10 productos por página
-    
+
         return response()->json($products); // Devuelve toda la estructura de la paginación
     }
-    
+
 
 
 
@@ -60,14 +60,14 @@ class ProductController extends Controller
     // Método para mostrar la tabla de productos con stock igual o menor a 4
     public function indexLowStock()
     {
-        // Obtener productos con stock igual o menor a 4
-        $products = Product::where('stock', '<=', 4)->get();
-
         // Extraer categorías únicas de los productos con bajo stock
-        $categories = $products->pluck('category')->unique()->sort();
+        $categories = Product::where('stock', '<=', 4)
+            ->pluck('category')
+            ->unique()
+            ->sort();
 
-        // Pasar productos y categorías a la vista de productos con bajo stock
-        return view('admin.products.products-lowstock-index', compact('products', 'categories'));
+        // Solo pasar las categorías, sin los productos
+        return view('admin.products.products-lowstock-index', compact('categories'));
     }
 
 
