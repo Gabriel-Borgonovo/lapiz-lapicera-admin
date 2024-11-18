@@ -96,11 +96,13 @@ class ProductController extends Controller
 
         $products = $query->paginate(10);
 
+        // Incluir el total de productos en la respuesta JSON
         return response()->json([
             'products' => $products->items(),
             'pagination' => [
                 'current_page' => $products->currentPage(),
                 'last_page' => $products->lastPage(),
+                'total' => $products->total(), // Aquí se incluye el total
             ],
         ]);
     }

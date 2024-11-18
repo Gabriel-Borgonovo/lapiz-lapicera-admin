@@ -11,7 +11,8 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100 overflow-scroll">
                     <div class="flex min-600 justify-between mb-4 items-center shadow-lg p-2 rounded">
                         <h3 class="text-lg font-semibold">{{ __('Productos con Bajo Stock') }}</h3>
-                        <a href="{{ route('productos.pdf') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        <a href="{{ route('productos.pdf') }}"
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                             Descargar Lista PDF
                         </a>
                     </div>
@@ -68,41 +69,62 @@
             let typingTimer;
 
             async function loadProducts(page = 1) {
-                const search = searchInput.value.trim();
+                const search = searchInput.value.trim(); // Toma el valor de búsqueda actual
+                const itemsPerPage = 10; // Asegúrate de que coincida con el backend
+
                 try {
-                    const response = await fetch(`{{ route('getProductsWithStock') }}?page=${page}&search=${encodeURIComponent(search)}`);
+                    const response = await fetch(
+                        `{{ route('getProductsWithStock') }}?page=${page}&search=${encodeURIComponent(search)}`
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`Error en la respuesta del servidor: ${response.statusText}`);
+                    }
+
                     const data = await response.json();
 
+                    //console.log(data); // Revisa la estructura del JSON para depuración
+
+                    // Validación de los datos recibidos
+                    if (!data.products || !data.pagination) {
+                        throw new Error("Datos incompletos recibidos del servidor.");
+                    }
+
+                    // Limpiar la tabla antes de llenarla
                     tableBody.innerHTML = '';
+
+                    // Rellenar la tabla con los productos
                     data.products.forEach((product, index) => {
                         const orderNumber = (page - 1) * itemsPerPage + (index + 1);
 
-                        const stockStatus = product.stock === 0
-                            ? '<span class="bg-red-500 text-white font-bold px-2 py-1 rounded">Sin Stock</span>'
-                            : (product.stock <= 4
-                                ? '<span class="bg-yellow-500 font-bold px-2 py-1 rounded">Al Límite</span>'
-                                : '');
+                        const stockStatus = product.stock === 0 ?
+                            '<span class="bg-red-500 text-white font-bold px-2 py-1 rounded">Sin Stock</span>' :
+                            (product.stock <= 4 ?
+                                '<span class="bg-yellow-500 font-bold px-2 py-1 rounded">Al Límite</span>' :
+                                '');
 
                         tableBody.innerHTML += `
-                            <tr>
-                                <td class="p-2 border-2">${orderNumber}</td>
-                                <td class="p-2 border-2">
-                                    <img src="${product.image}" alt="${product.name}" class="w-16 h-16 object-cover">
-                                </td>
-                                <td class="p-2 border-2">${product.barcode}</td>
-                                <td class="p-2 border-2">${product.name}</td>
-                                <td class="p-2 border-2">${product.stock}</td>
-                                <td class="p-2 border-2 text-center">${stockStatus}</td>
-                            </tr>
-                        `;
+                <tr>
+                    <td class="p-2 border-2">${orderNumber}</td>
+                    <td class="p-2 border-2">
+                        <img src="${product.image}" alt="${product.name}" class="w-16 h-16 object-cover">
+                    </td>
+                    <td class="p-2 border-2">${product.barcode}</td>
+                    <td class="p-2 border-2">${product.name}</td>
+                    <td class="p-2 border-2">${product.stock}</td>
+                    <td class="p-2 border-2 text-center">${stockStatus}</td>
+                </tr>
+            `;
                     });
 
-                     // Mostrar el rango actual de productos y el total
-        const totalProducts = data.pagination.total;
-        const startProduct = (page - 1) * itemsPerPage + 1;
-        const endProduct = Math.min(page * itemsPerPage, totalProducts);
+                    // Cálculo del rango actual y total de productos
+                    const totalProducts = data.pagination.total;
+                    const startProduct = (page - 1) * itemsPerPage + 1;
+                    const endProduct = Math.min(page * itemsPerPage, totalProducts);
 
-        paginationInfo.textContent = `Mostrando productos ${startProduct} a ${endProduct} de ${totalProducts} en total`;
+                    // Mostrar rango y total de productos
+                    paginationInfo.textContent =
+                        `Mostrando productos ${startProduct} a ${endProduct} de ${totalProducts} en total`;
 
                     // Configuración de la paginación
                     paginationDiv.innerHTML = '';
@@ -114,10 +136,10 @@
                         // Botón "Primero"
                         if (currentPage > 1) {
                             paginationLinks.push(`
-                                <button class="pagination-button bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-l" data-page="1">
-                                    Primero
-                                </button>
-                            `);
+                    <button class="pagination-button bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-l" data-page="1">
+                        Primero
+                    </button>
+                `);
                         }
 
                         // Números de página, máximo 3 visibles
@@ -132,25 +154,26 @@
 
                         for (let i = startPage; i <= endPage; i++) {
                             paginationLinks.push(`
-                                <button class="pagination-button ${i === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-800'} font-semibold py-2 px-4" data-page="${i}">
-                                    ${i}
-                                </button>
-                            `);
+                    <button class="pagination-button ${i === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-800'} font-semibold py-2 px-4" data-page="${i}">
+                        ${i}
+                    </button>
+                `);
                         }
 
                         // Botón "Último"
                         if (currentPage < lastPage) {
                             paginationLinks.push(`
-                                <button class="pagination-button bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-r" data-page="${lastPage}">
-                                    Último
-                                </button>
-                            `);
+                    <button class="pagination-button bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-r" data-page="${lastPage}">
+                        Último
+                    </button>
+                `);
                         }
 
                         paginationDiv.innerHTML = paginationLinks.join('');
                     }
                 } catch (error) {
                     console.error('Error al cargar productos:', error);
+                    paginationInfo.textContent = 'Error al cargar productos. Inténtalo de nuevo más tarde.';
                 }
             }
 
@@ -177,5 +200,3 @@
         });
     </script>
 </x-app-layout>
-
-

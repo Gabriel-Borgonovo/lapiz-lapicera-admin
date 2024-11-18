@@ -133,7 +133,7 @@ Route::middleware('auth')->group(function () {
     // Ruta para la caja
     Route::get('admin/cashbox', [CashboxController::class, 'index'])->name('cashbox-index');
     Route::post('/admin/caja/pdf/{date}', [CashboxController::class, 'generatePDF'])->name('cashbox.generatePDF');
-
+    Route::get('/cashbox/transactions', [CashboxController::class, 'fetchTransactions'])->name('cashbox.fetch');
 
 
     /******************************************** */
