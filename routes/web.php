@@ -71,12 +71,13 @@ Route::middleware('auth')->group(function () {
     Route::get('admin/sales', [SalesController::class, 'index'])->name('sales.index');
     Route::get('admin/sales/get-sales', [SalesController::class, 'getSales'])->name('sales.get');
     Route::get('admin/sales/create', [SalesController::class, 'create'])->name('sales-create');
+    Route::get('admin/sales/sell/{id}', [SalesController::class, 'sell'])->name('products.sell');
     Route::get('admin/sales/{id}', [SalesController::class, 'show'])->name('sales-show');
     Route::get('admin/sales/{id}/edit', [SalesController::class, 'edit'])->name('sales-edit');
     Route::put('admin/sales/{id}', [SalesController::class, 'update'])->name('sales-update');
 
     Route::delete('/admin/sales/{id}', [SalesController::class, 'destroy'])->name('sales-destroy');
-
+    
 
     // Obtener detalles de un producto por código de barras
     Route::post('admin/sales/get-product-by-barcode', [SalesController::class, 'getProductByBarcode'])

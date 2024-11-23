@@ -205,4 +205,13 @@ class SalesController extends Controller
 
         return response()->json(['success' => true, 'redirect_url' => route('sales.index')]);
     }
+
+
+    public function sell($id)
+    {
+    $product = Product::findOrFail($id);
+
+    // Lógica para procesar la venta (puedes mostrar una vista o realizar la venta directamente)
+    return view('admin.sales.sales-manual-sell', compact('product'));
+    }
 }

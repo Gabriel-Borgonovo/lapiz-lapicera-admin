@@ -108,6 +108,9 @@
                 <td class="p-2">${product.stock}</td>
                 <td class="p-2 text-center">
                     <div class="flex justify-center items-center flex-nowrap gap-2">
+
+                        <a href="/admin/sales/sell/${product.id}" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded">Vender</a>
+
                         <a href="/admin/products/${product.id}/edit" class="inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded">Editar</a>
                         <form action="/admin/products/${product.id}" method="POST" class="inline-block" onsubmit="return confirm('¿Está seguro de eliminar este producto?');">
                             @csrf

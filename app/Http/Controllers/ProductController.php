@@ -46,6 +46,7 @@ class ProductController extends Controller
         $query->orderBy('created_at', 'desc');
 
         $products = $query->paginate(10); // 10 productos por página
+        
 
         return response()->json($products); // Devuelve toda la estructura de la paginación
     }
